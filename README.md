@@ -9,9 +9,26 @@ whole CMS. Runs entirely on a single Oracle VPS (Dokploy / Docker Swarm + MongoD
 > + IT business, but the engineering focus is *agentic content generation*, *self-hosted
 > CMS infrastructure*, and *programmatic SEO at scale*.
 
-Fork of [`payloadcms/website`](https://github.com/payloadcms/website) (MIT) →
-`Yusufkotavom/website`. Live: `https://payload.kotacom.id`.
+Fork of [`payloadcms/website`](https://github.com/payloadcms/website) (MIT) → front-end
+rebuilt in **`Yusufkotavom/kotacom-platform`** (this repo). Live: `https://payload.kotacom.id`.
 Full dossier: **[`PROJECT.md`](./PROJECT.md)**.
+
+---
+
+## 🎨 Front-end — "Bauhaus Color Block"
+
+The presentation layer is a **greenfield Next.js + Tailwind v4** build on top of the
+unchanged Payload backend. Design language is locked: off-white `#F0F0F0` canvas, stark
+black `#121212`, primary **red `#D02020` / blue `#1040C0` / yellow `#F0C020`**, thick
+2/4px black borders, **hard offset shadows** (4/6/8px, no blur), radius 0, **Outfit**
+display type, geometric motifs (circle / square / triangle / diamond).
+
+- Tokens: `src/app/(frontend)/globals.css` (`@theme`, `--color-nb-*`, `--shadow-nb-*`).
+- Primitives: `src/components/nb/*` (Button, Card, Section, Pill, Shape, Accordion,
+  Header, Footer) + block renderer `src/components/nb/blocks/index.tsx`.
+- Detail templates: `src/components/nb/{Post,Product,CaseStudy}.tsx`.
+- Legacy Payload block SCSS is progressively retired; the new renderer covers the
+  frequent block types with a smart generic fallback.
 
 ---
 
