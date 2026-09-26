@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { buildSafe } from '@root/utilities/buildSafe'
 import BreadcrumbsBar from '@components/Hero/BreadcrumbsBar/index'
 import { PayloadRedirects } from '@components/PayloadRedirects/index'
-import { Post } from '@components/Post/index'
+import { BauhausPost } from '@components/nb/Post'
 import { RefreshRouteOnSave } from '@components/RefreshRouterOnSave/index'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { fetchBlogPost, fetchPosts } from '@data'
@@ -72,7 +72,7 @@ const PostPage = async ({
           }),
         ]}
       />
-      <Post {...blogPost} />
+      <BauhausPost post={blogPost} />
     </React.Fragment>
   )
 }

@@ -4,13 +4,11 @@ import { getPayload } from 'payload'
 import Link from 'next/link'
 import React from 'react'
 
-import { BackgroundGrid } from '@components/BackgroundGrid/index'
-import { Gutter } from '@components/Gutter/index'
 import { JsonLd } from '@components/SEO/JsonLd'
+import { Card } from '@components/nb/Card'
+import { Section, SectionTag } from '@components/nb/Section'
 import { buildMetadata } from '@root/seo/metadata'
 import { breadcrumbSchema, collectionPageSchema } from '@root/seo/schema'
-
-import classes from './index.module.scss'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,43 +69,50 @@ export default async function ProductsIndex() {
           }),
         ]}
       />
-      <div className={classes.wrapper}>
-        <BackgroundGrid zIndex={0} />
-        <Gutter>
-          <header className={classes.header}>
-            <p className={classes.eyebrow}>Katalog</p>
-            <h1 className={classes.heading}>Produk & Layanan</h1>
-            <p className={classes.lead}>
-              Layanan, portofolio, dan produk Kotacom — satu mitra untuk kebutuhan digital dan
-              cetak bisnis Anda.
-            </p>
-          </header>
+      <Section bg="canvas">
+        <SectionTag index="00" label="Katalog" />
+        <h1 className="mt-4 text-4xl uppercase leading-[0.95] tracking-tighter sm:text-5xl lg:text-6xl">
+          Produk &amp; Layanan
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg font-medium leading-relaxed">
+          Layanan, portofolio, dan produk Kotacom — satu mitra untuk kebutuhan digital dan cetak
+          bisnis Anda.
+        </p>
+      </Section>
 
-          {products.length === 0 ? (
-            <p className={classes.empty}>Belum ada produk yang dipublikasikan.</p>
-          ) : (
-            OFFERINGS.map((group) => {
-              const rows = products.filter((p) => (p.offeringType || 'service') === group.value)
-              if (rows.length === 0) return null
-              return (
-                <section className={classes.group} key={group.value}>
-                  <h2 className={classes.groupTitle}>{group.label}</h2>
-                  <ul className={classes.grid}>
-                    {rows.map((row) => (
-                      <li className={classes.item} key={row.slug}>
-                        <Link className={classes.cardLink} href={`/produk/${row.slug}`}>
-                          <span className={classes.cardTitle}>{row.title}</span>
-                          <span className={classes.cardCta}>Lihat detail →</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )
-            })
-          )}
-        </Gutter>
-      </div>
+      {products.length === 0 ? (
+        <Section bg="paper">
+          <p className="font-bold uppercase">Belum ada produk yang dipublikasikan.</p>
+        </Section>
+      ) : (
+        OFFERINGS.map((group) => {
+          const rows = products.filter((p) => (p.offeringType || 'service') === group.value)
+          if (rows.length === 0) return null
+          return (
+            <Section bg="paper" key={group.value}>
+              <h2 className="mb-8 text-3xl uppercase tracking-tighter">{group.label}</h2>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {rows.map((row, i) => (
+                  <Link key={row.slug} href={`/produk/${row.slug}`} className="block">
+                    <Card
+                      className="h-full p-6"
+                      cornerShape={(['circle', 'square', 'triangle', 'diamond'] as const)[i % 4]}
+                      cornerTone={(['yellow', 'blue', 'red', 'yellow'] as const)[i % 4]}
+                    >
+                      <span className="text-xl font-black uppercase tracking-tight">
+                        {row.title}
+                      </span>
+                      <span className="mt-3 block font-mono text-xs font-bold uppercase tracking-widest">
+                        Lihat detail &rarr;
+                      </span>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </Section>
+          )
+        })
+      )}
     </React.Fragment>
   )
 }

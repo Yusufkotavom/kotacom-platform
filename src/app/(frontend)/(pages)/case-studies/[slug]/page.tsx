@@ -13,7 +13,7 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-import { CaseStudy } from './client_page'
+import { BauhausCaseStudy } from '@components/nb/CaseStudy'
 
 // Rendered on demand; the case-study query is cached at the data layer (ISR) so the
 // page is served from cache between admin edits. Keep it build-safe: generateStaticParams
@@ -56,7 +56,7 @@ const CaseStudyBySlug = async ({ params }) => {
           }),
         ]}
       />
-      <CaseStudy {...caseStudy} />
+      <BauhausCaseStudy study={caseStudy} />
     </>
   )
 }

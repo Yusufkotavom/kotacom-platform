@@ -11,7 +11,7 @@ import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import React from 'react'
 
-import { Product } from './client_page'
+import { BauhausProduct } from '@components/nb/Product'
 
 // Rendered on demand; the product query is cached at the data layer (ISR) so the
 // page is served from cache between admin edits. Keep it build-safe: generateStaticParams
@@ -48,7 +48,7 @@ const ProductBySlug = async ({ params }) => {
           productSchema(product),
         ]}
       />
-      <Product {...product} />
+      <BauhausProduct product={product} />
     </>
   )
 }

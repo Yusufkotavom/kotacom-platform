@@ -4,13 +4,12 @@ import { getPayload } from 'payload'
 import Link from 'next/link'
 import React from 'react'
 
-import { BackgroundGrid } from '@components/BackgroundGrid/index'
-import { Gutter } from '@components/Gutter/index'
 import { JsonLd } from '@components/SEO/JsonLd'
+import { Card } from '@components/nb/Card'
+import { Pill } from '@components/nb/Pill'
+import { Section, SectionTag } from '@components/nb/Section'
 import { buildMetadata } from '@root/seo/metadata'
 import { breadcrumbSchema, collectionPageSchema } from '@root/seo/schema'
-
-import classes from './index.module.scss'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,38 +72,48 @@ export default async function PostsIndex() {
           }),
         ]}
       />
-      <div className={classes.wrapper}>
-        <BackgroundGrid zIndex={0} />
-        <Gutter>
-          <header className={classes.header}>
-            <p className={classes.eyebrow}>Blog</p>
-            <h1 className={classes.heading}>Artikel & Wawasan</h1>
-            <p className={classes.lead}>
-              Panduan praktis, tips, dan cerita dari tim Kotacom — untuk membantu bisnis Anda
-              tumbuh.
-            </p>
-          </header>
+      <Section bg="canvas">
+        <SectionTag index="00" label="Blog" />
+        <h1 className="mt-4 text-4xl uppercase leading-[0.95] tracking-tighter sm:text-5xl lg:text-6xl">
+          Artikel &amp; Wawasan
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg font-medium leading-relaxed">
+          Panduan praktis, tips, dan cerita dari tim Kotacom — untuk membantu bisnis Anda tumbuh.
+        </p>
+      </Section>
 
-          {posts.length === 0 ? (
-            <p className={classes.empty}>Belum ada artikel yang dipublikasikan.</p>
-          ) : (
-            <ul className={classes.grid}>
-              {posts.map((post) => {
-                const cat = categoryOf(post)
-                return (
-                  <li className={classes.item} key={post.slug}>
-                    <Link className={classes.cardLink} href={`/posts/${post.slug}`}>
-                      {cat?.name && <span className={classes.cardMeta}>{cat.name}</span>}
-                      <span className={classes.cardTitle}>{post.title}</span>
-                      <span className={classes.cardCta}>Baca artikel →</span>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </Gutter>
-      </div>
+      {posts.length === 0 ? (
+        <Section bg="paper">
+          <p className="font-bold uppercase">Belum ada artikel yang dipublikasikan.</p>
+        </Section>
+      ) : (
+        <Section bg="paper">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post, i) => {
+              const cat = categoryOf(post)
+              const shapes = ['circle', 'square', 'triangle', 'diamond'] as const
+              const tones = ['yellow', 'blue', 'red', 'yellow'] as const
+              return (
+                <Link key={post.slug} href={`/posts/${post.slug}`} className="block">
+                  <Card
+                    className="h-full p-6"
+                    cornerShape={shapes[i % 4]}
+                    cornerTone={tones[i % 4]}
+                  >
+                    {cat?.name ? <Pill tone="red">{cat.name}</Pill> : null}
+                    <span className="mt-4 block text-xl font-black uppercase leading-tight tracking-tight">
+                      {post.title}
+                    </span>
+                    <span className="mt-3 block font-mono text-xs font-bold uppercase tracking-widest">
+                      Baca artikel &rarr;
+                    </span>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
+        </Section>
+      )}
     </React.Fragment>
   )
 }
