@@ -49,7 +49,7 @@ export function BauhausCaseStudy({ study }: { study: any }) {
           <h2 className="max-w-2xl text-3xl uppercase leading-[0.95] tracking-tighter sm:text-4xl">
             Punya tantangan serupa?
           </h2>
-          <LinkButton href="https://wa.me/" variant="ink" size="lg">
+          <LinkButton href="https://wa.me/6285799520350" variant="ink" size="lg">
             Konsultasi gratis
           </LinkButton>
         </div>

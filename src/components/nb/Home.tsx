@@ -9,7 +9,7 @@ import { Shape } from './Shape'
 
 /* ----------------------------------------------------------------- content */
 
-const navWa = 'https://wa.me/'
+const navWa = 'https://wa.me/6285799520350'
 
 const metrics = [
   { label: 'Berdiri sejak', value: '2008', note: '17 tahun mendampingi bisnis' },

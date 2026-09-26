@@ -381,6 +381,178 @@ const SECTION_INDEX: Record<string, string> = {
   hoverCards: '03',
 }
 
+/* ------------------------------------------------------- cta / commerce */
+
+const WA_NUMBER = '6285799520350'
+
+function WhatsAppCtaBlock({ fields }: { fields: any; id?: string }) {
+  const { heading, body, variant = 'button', label } = fields || {}
+  const text = encodeURIComponent(heading || body || 'Halo Kotacom, saya ingin bertanya.')
+  const href = `https://wa.me/${WA_NUMBER}?text=${text}`
+  if (variant === 'link') {
+    return (
+      <Section bg="canvas">
+        <a
+          href={href}
+          className="inline-block text-lg font-bold uppercase tracking-widest underline decoration-4 underline-offset-4"
+        >
+          {label || heading || 'Chat via WhatsApp →'}
+        </a>
+      </Section>
+    )
+  }
+  return (
+    <Section bg="yellow">
+      <div className="flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          {heading ? (
+            <h2 className="max-w-2xl text-3xl uppercase leading-[0.95] tracking-tighter sm:text-4xl">
+              {heading}
+            </h2>
+          ) : null}
+          {body ? <p className="mt-3 max-w-2xl font-medium opacity-90">{body}</p> : null}
+        </div>
+        <LinkButton href={href} variant={variant === 'hero' ? 'primary' : 'ink'} size="lg">
+          {label || 'Chat WhatsApp'}
+        </LinkButton>
+      </div>
+    </Section>
+  )
+}
+
+function PricingBlock({ fields }: { fields: any; id?: string }) {
+  const plans = fields?.plans || []
+  const disclaimer = fields?.disclaimer
+  if (!Array.isArray(plans) || plans.length === 0) return null
+  return (
+    <Section bg="canvas">
+      <div
+        className={cn(
+          'grid gap-8',
+          plans.length >= 3 ? 'lg:grid-cols-3' : plans.length === 2 ? 'lg:grid-cols-2' : '',
+        )}
+      >
+        {plans.map((p: any, i: number) => (
+          <Card
+            key={i}
+            className="flex h-full flex-col p-8"
+            cornerShape={(['circle', 'square', 'triangle'] as const)[i % 3]}
+            cornerTone={(['yellow', 'blue', 'red'] as const)[i % 3]}
+          >
+            <h3 className="text-2xl uppercase tracking-tight">{p.name || p.title}</h3>
+            {p.price ? (
+              <p className="mt-4 text-4xl font-black tracking-tighter">
+                {p.price}
+                <span className="ml-2 text-sm font-bold uppercase tracking-widest opacity-60">
+                  / bulan
+                </span>
+              </p>
+            ) : null}
+            {p.description ? (
+              <p className="mt-4 font-medium opacity-80">{p.description}</p>
+            ) : null}
+            {Array.isArray(p.features) && p.features.length ? (
+              <ul className="mt-6 space-y-2">
+                {p.features.map((f: any, j: number) => (
+                  <li key={j} className="flex items-start gap-2 font-medium">
+                    <span className="mt-1 inline-block h-3 w-3 shrink-0 border-2 border-ink bg-nb-yellow" />
+                    <span>{f.feature}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <div className="mt-auto pt-8">
+              <LinkButton
+                href={hrefOf(p.link) === '#' ? `https://wa.me/${WA_NUMBER}` : hrefOf(p.link)}
+                variant={i === 0 ? 'primary' : 'outline'}
+                size="lg"
+              >
+                Pilih paket
+              </LinkButton>
+            </div>
+          </Card>
+        ))}
+      </div>
+      {disclaimer ? (
+        <p className="mt-6 font-mono text-xs font-bold uppercase tracking-widest opacity-60">
+          {disclaimer}
+        </p>
+      ) : null}
+    </Section>
+  )
+}
+
+function LogoGridBlock({ fields }: { fields: any; id?: string }) {
+  const logos = fields?.logos || []
+  if (!Array.isArray(logos) || logos.length === 0) return null
+  return (
+    <Section bg="paper">
+      <div className="grid grid-cols-2 items-center gap-6 sm:grid-cols-3 lg:grid-cols-5">
+        {logos.map((l: any, i: number) => (
+          <div key={i} className="flex items-center justify-center p-4">
+            {l.logoMedia && typeof l.logoMedia === 'object' ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={l.logoMedia.url || l.logoMedia.sizes?.small?.url}
+                alt={l.logoMedia.alt || ''}
+                className="max-h-16 w-auto object-contain"
+              />
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
+function ComparisonTableBlock({ fields }: { fields: any; id?: string }) {
+  const header = fields?.header || {}
+  const rows = fields?.rows || []
+  return (
+    <Section bg="canvas">
+      {fields?.introContent ? (
+        <div className="mb-8 max-w-3xl">
+          <RichText content={fields.introContent} />
+        </div>
+      ) : null}
+      <div className="overflow-hidden border-4 border-ink shadow-nb-lg">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="bg-ink text-white">
+              <th className="p-5 font-black uppercase tracking-wider">
+                {header.tableTitle || 'Fitur'}
+              </th>
+              <th className="border-l-4 border-white/30 p-5 font-black uppercase tracking-wider">
+                {header.columnOneHeader || 'Kotacom'}
+              </th>
+              <th className="border-l-4 border-white/30 p-5 font-black uppercase tracking-wider">
+                {header.columnTwoHeader || 'Lainnya'}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r: any, i: number) => (
+              <tr key={i} className={i % 2 ? 'bg-paper' : 'bg-muted'}>
+                <td className="p-5 font-bold">{r.feature}</td>
+                <td className="border-l-4 border-ink p-5">
+                  {r.columnOneCheck ? (
+                    <span className="font-black">✓ {r.columnOne}</span>
+                  ) : (
+                    r.columnOne
+                  )}
+                </td>
+                <td className="border-l-4 border-ink p-5 opacity-80">
+                  {r.columnTwoCheck ? <span className="font-black">✓ {r.columnTwo}</span> : r.columnTwo}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Section>
+  )
+}
+
 const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   content: ContentBlock,
   cardGrid: CardGridBlock,
@@ -394,17 +566,18 @@ const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   linkGrid: LinkGridBlock,
   contentGrid: GenericBlock,
   hoverHighlights: GenericBlock,
-  pricing: GenericBlock,
-  comparisonTable: GenericBlock,
+  pricing: PricingBlock,
+  comparisonTable: ComparisonTableBlock,
   mediaContent: GenericBlock,
   mediaContentAccordion: GenericBlock,
-  logoGrid: GenericBlock,
+  logoGrid: LogoGridBlock,
   caseStudyCards: GenericBlock,
   caseStudiesHighlight: GenericBlock,
   stickyHighlights: GenericBlock,
   slider: GenericBlock,
   codeFeature: GenericBlock,
   code: GenericBlock,
+  whatsappCta: WhatsAppCtaBlock,
 }
 
 function fieldsOf(block: any): any {

@@ -32,7 +32,7 @@ export function BauhausProduct({ product }: { product: any }) {
               </p>
             ) : null}
             <div className="mt-8 flex flex-wrap gap-4">
-              <LinkButton href="https://wa.me/" variant="primary" size="lg">
+              <LinkButton href="https://wa.me/6285799520350" variant="primary" size="lg">
                 Pesan via WhatsApp
               </LinkButton>
               <LinkButton href="/produk" variant="outline" size="lg">
@@ -107,7 +107,7 @@ export function BauhausProduct({ product }: { product: any }) {
           <h2 className="max-w-2xl text-3xl uppercase leading-[0.95] tracking-tighter sm:text-4xl">
             Siap mengerjakan {product?.title} untuk bisnis Anda?
           </h2>
-          <LinkButton href="https://wa.me/" variant="ink" size="lg">
+          <LinkButton href="https://wa.me/6285799520350" variant="ink" size="lg">
             Hubungi kami
           </LinkButton>
         </div>
