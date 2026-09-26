@@ -1,0 +1,100 @@
+@use '@scss/common' as *;
+
+.wrapper {
+  position: relative;
+  padding: 4rem 0 6rem;
+}
+
+.header {
+  max-width: 52rem;
+  margin-bottom: 3rem;
+}
+
+.eyebrow {
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin: 0 0 1rem;
+}
+
+.heading {
+  font-family: var(--font-family-sans);
+  font-weight: 500;
+  font-size: 3.5rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin: 0 0 1rem;
+
+  @include small-break {
+    font-size: 2.25rem;
+  }
+}
+
+.lead {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--theme-elevation-100, rgba(255, 255, 255, 0.12));
+
+  @include small-break {
+    grid-template-columns: 1fr;
+  }
+}
+
+.item {
+  border-bottom: 1px solid var(--theme-elevation-100, rgba(255, 255, 255, 0.12));
+  border-right: 1px solid var(--theme-elevation-100, rgba(255, 255, 255, 0.12));
+
+  &:nth-child(2n) {
+    border-right: none;
+  }
+}
+
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: space-between;
+  min-height: 12rem;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background 150ms var(--ease, ease);
+
+  &:hover {
+    background: var(--theme-elevation-50, rgba(255, 255, 255, 0.03));
+  }
+}
+
+.cardTitle {
+  font-family: var(--font-family-sans);
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.cardCta {
+  font-family: var(--font-family-mono);
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.empty {
+  opacity: 0.6;
+  padding: 2rem 0;
+}

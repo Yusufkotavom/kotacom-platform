@@ -1,0 +1,161 @@
+@use '@scss/common' as *;
+
+// Shared WhatsApp CTA styling. Follows DESIGN.md: hairline 1px borders,
+// radius 0, mono-ish labels, no glow/gradient/glass.
+
+$wa-green: #25d366;
+
+.wa {
+  --wa-bg: var(--theme-elevation-0);
+  --wa-fg: var(--theme-elevation-1000);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-family-mono, 'GeistMono', monospace);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--theme-border-color);
+  border-radius: 0;
+  background: var(--wa-bg);
+  color: var(--wa-fg);
+  padding: 0.7rem 1rem;
+  transition: background-color var(--trans-default) ease, color var(--trans-default) ease,
+    border-color var(--trans-default) ease;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-elevation-100);
+    border-color: var(--wa-green);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wa-green);
+    outline-offset: 2px;
+  }
+}
+
+.iconWrap {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+  color: $wa-green;
+}
+
+.glyph {
+  display: block;
+}
+
+.label {
+  line-height: 1;
+}
+
+// --- Variants -------------------------------------------------------------
+
+.button {
+  --wa-bg: var(--wa-green);
+  --wa-fg: #000;
+  border-color: var(--wa-green);
+  font-weight: 500;
+
+  .iconWrap {
+    color: #000;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, #{$wa-green} 85%, #000);
+  }
+}
+
+.hero {
+  padding: 0.9rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: $wa-green;
+
+  &:hover {
+    background: transparent;
+    text-decoration: underline;
+  }
+}
+
+// Floating action button — fixed, bottom corner.
+.floating {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: var(--z-status);
+  width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  justify-content: center;
+  border-radius: 0;
+  background: $wa-green;
+  border-color: $wa-green;
+
+  .iconWrap {
+    color: #000;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, #{$wa-green} 85%, #000);
+    border-color: $wa-green;
+  }
+
+  @include small-break {
+    right: 0.875rem;
+    bottom: 4.25rem; // clears the sticky bar
+  }
+}
+
+.floatingLeft {
+  right: auto;
+  left: 1.25rem;
+
+  @include small-break {
+    right: auto;
+    left: 0.875rem;
+  }
+}
+
+// Sticky bottom bar — mobile only.
+.sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-status);
+  justify-content: center;
+  padding: 0.85rem 1rem;
+  border: 0;
+  border-top: 1px solid var(--theme-border-color);
+  border-radius: 0;
+  background: var(--wa-green);
+  color: #000;
+  font-weight: 500;
+
+  .iconWrap {
+    color: #000;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, #{$wa-green} 85%, #000);
+  }
+
+  @include mid-break {
+    display: none;
+  }
+}

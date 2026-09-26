@@ -1,0 +1,43 @@
+// Ambient background: self-hosted, CSS-only. No external media, no glass.
+
+.backgroundGradientWrapper {
+  z-index: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: var(--color-base-1000);
+  max-height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+// Faint blueprint grid, masked so it fades out instead of fighting the copy.
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--grid-line-dark) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-dark) 1px, transparent 1px);
+  background-size: 96px 96px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 100%);
+  opacity: 0.5;
+}
+
+// One soft radial wash for depth. Orthogonal, no gradient band.
+.wash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgb(255 255 255 / 0.04), transparent 70%);
+}
+
+// Vignette so the block edge stays crisp against the AMOLED base.
+.backgroundGradientWrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 100px 120px 100px var(--color-base-1000);
+  pointer-events: none;
+}

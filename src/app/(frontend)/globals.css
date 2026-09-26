@@ -1,0 +1,112 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* ---------------------------------------------------------------------------
+   Bauhaus design tokens — single source of truth.
+   "Form follows function": pure primaries, stark black, hard offset shadows.
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Palette (strictly Bauhaus primaries + black/white) */
+  --color-canvas: #f0f0f0; /* off-white page */
+  --color-ink: #121212; /* stark black */
+  --color-paper: #ffffff; /* white surfaces */
+  --color-muted: #e0e0e0; /* muted grey */
+  --color-nb-red: #d02020; /* Bauhaus red */
+  --color-nb-blue: #1040c0; /* Bauhaus blue */
+  --color-nb-yellow: #f0c020; /* Bauhaus yellow */
+  --color-nb-orange: #eb6722; /* CTA decorative accent */
+
+  /* Typography */
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* Hard offset shadows (never blurred) */
+  --shadow-nb-sm: 4px 4px 0 0 var(--color-ink);
+  --shadow-nb: 6px 6px 0 0 var(--color-ink);
+  --shadow-nb-lg: 8px 8px 0 0 var(--color-ink);
+  --shadow-nb-white: 6px 6px 0 0 #ffffff;
+
+  /* Motion: mechanical + snappy */
+  --ease-nb: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--color-nb-yellow);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-nb-blue);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Dot-grid texture */
+  .dots {
+    background-image: radial-gradient(var(--color-ink) 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
+  .dots-white {
+    background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
+
+  /* Primitive shapes */
+  .tri {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+  .rot {
+    transform: rotate(45deg);
+  }
+
+  /* Mechanical button/card press */
+  .press {
+    transition:
+      transform 0.16s var(--ease-nb),
+      box-shadow 0.16s var(--ease-nb),
+      opacity 0.16s var(--ease-nb);
+  }
+  .press:hover {
+    opacity: 0.92;
+  }
+  .press:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+
+  /* Subtle lift on cards */
+  .lift {
+    transition:
+      transform 0.2s var(--ease-nb),
+      box-shadow 0.2s var(--ease-nb);
+  }
+  .lift:hover {
+    transform: translateY(-4px);
+  }
+}

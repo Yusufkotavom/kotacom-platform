@@ -1,0 +1,155 @@
+@use '@scss/common' as *;
+
+.hero {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.titleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--grid-line-dark);
+  padding: 0.25rem 0.6rem;
+}
+
+.title {
+  @include h1;
+  margin: 0;
+}
+
+.shortDescription {
+  @include large-body;
+  max-width: 34rem;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.metaWrapper {
+  display: flex;
+  gap: 3rem;
+  border-top: 1px solid var(--grid-line-dark);
+  padding-top: 1.5rem;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metaLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin: 0;
+}
+
+.metaValue {
+  margin: 0;
+  font-weight: 500;
+}
+
+.featuredImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.eyebrow {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin: 0 0 0.5rem;
+}
+
+.specs {
+  border-top: 1px solid var(--grid-line-dark);
+  padding-top: 2rem;
+  margin-top: 2rem;
+}
+
+.specsTitle {
+  @include h3;
+  margin: 0;
+}
+
+.specsList {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--grid-line-dark);
+}
+
+.specLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.specValue {
+  margin: 0;
+  text-align: right;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 2rem 0;
+
+  @include mid-break {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include small-break {
+    grid-template-columns: 1fr;
+  }
+}
+
+.galleryItem {
+  margin: 0;
+  border: 1px solid var(--grid-line-dark);
+}
+
+.galleryImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.galleryCaption {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  padding: 0.6rem 0.75rem;
+  opacity: 0.7;
+}

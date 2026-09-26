@@ -1,0 +1,50 @@
+/* ============================================================================
+   Kotacom — brand accent layer
+   Warms the rigid Geist / hairline base for a studio that is half *print*
+   (ink, paper, spot colour) and half *IT* (precision, uptime).
+   Consumed everywhere via `var(--kc-*)`. Structural grid & radius-0 panels
+   stay intact — accents are applied selectively (buttons, links, images,
+   interactive surfaces), never as a wash.
+   Reference: ui-ux-pro-max `dark-mode-oled` + `editorial-grid-magazine`.
+   ========================================================================== */
+
+:root {
+  /* ── brand accent — "Kotacom blue" (also the historical site accent) ───── */
+  --kc-accent: rgb(0, 112, 243); /* #0070F3 */
+  --kc-accent-strong: rgb(50, 145, 255); /* #3291FF — brighter, hover / on-dark */
+  --kc-accent-weak: rgba(0, 112, 243, 0.14);
+  --kc-accent-ring: rgba(0, 112, 243, 0.45);
+
+  /* ── warm secondary — the print / kraft pillar ─────────────────────────── */
+  --kc-warm: rgb(244, 172, 79); /* #F4AC4F amber */
+  --kc-warm-strong: rgb(255, 197, 122);
+  --kc-warm-weak: rgba(244, 172, 79, 0.14);
+
+  /* ── softened dark surfaces — break the flat AMOLED plane, no glow ─────── */
+  --kc-panel: #0a0a0a;
+  --kc-panel-2: #121212;
+  --kc-panel-hover: #171717;
+
+  /* ── selective radius — structure stays 0, interactive surfaces soften ─── */
+  --kc-radius-sm: 4px;
+  --kc-radius: 8px;
+  --kc-radius-lg: 12px;
+  --kc-radius-pill: 999px;
+
+  /* ── soft elevation for raised interactive surfaces only ───────────────── */
+  --kc-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+  --kc-shadow-accent: 0 14px 44px -18px var(--kc-accent-ring);
+
+  /* ── warm light "paper" mode (opt-in via [data-theme='light']) ─────────── */
+  --kc-paper: #f6f3ee;
+  --kc-paper-2: #efebe3;
+  --kc-ink: #17150f;
+}
+
+/* Light theme reads as warm paper, not clinical white. */
+[data-theme='light'] {
+  --kc-panel: var(--kc-paper);
+  --kc-panel-2: var(--kc-paper-2);
+  --kc-panel-hover: #e9e4da;
+  --kc-shadow: 0 1px 2px rgba(23, 21, 15, 0.06), 0 12px 32px -18px rgba(23, 21, 15, 0.18);
+}

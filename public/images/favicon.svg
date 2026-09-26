@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Kotacom">
+  <rect width="32" height="32" fill="#000000" />
+  <rect x="0.5" y="0.5" width="31" height="31" fill="none" stroke="#25d366" stroke-width="1" />
+  <path d="M11 8v16M11 16l9-8M11 16l9 8" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="square" />
+</svg>
