@@ -1,11 +1,11 @@
 import { buildSafe } from '@root/utilities/buildSafe'
 import type { Metadata } from 'next'
 
+import { BauhausBlocks } from '@components/nb/blocks/index'
 import { Hero } from '@components/Hero/index'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { PayloadRedirects } from '@components/PayloadRedirects'
 import { RefreshRouteOnSave } from '@components/RefreshRouterOnSave'
-import { RenderBlocks } from '@components/RenderBlocks/index'
 import { fetchPage, fetchPages } from '@data'
 import { buildMetadata } from '@root/seo/metadata'
 import { breadcrumbSchema } from '@root/seo/schema'
@@ -48,7 +48,7 @@ const Page = async ({
         )}
       />
       <Hero firstContentBlock={page.layout[0]} page={page} />
-      <RenderBlocks blocks={page.layout} hero={page.hero} />
+      <BauhausBlocks blocks={page.layout} />
     </React.Fragment>
   )
 }

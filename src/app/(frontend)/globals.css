@@ -110,3 +110,133 @@
     transform: translateY(-4px);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Legacy block interop — force the Payload block shell onto the Bauhaus
+   canvas and give the shared RichText renderer Bauhaus typography.
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* Every legacy block wrapper is a Bauhaus surface. */
+  [class*='blockWrapper'] {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+  }
+  /* Neutralise the legacy dark theme + gradient/scanline overlays. */
+  [class*='theme-dark'],
+  [class*='background-gradientUp'],
+  [class*='background-gradientDown'] {
+    background: var(--color-canvas) !important;
+    color: var(--color-ink);
+  }
+  /* Hide legacy decorative overlays (grid/scanline/gradient/noise). */
+  [class*='BackgroundGrid_'],
+  [class*='BackgroundScanline_'],
+  [class*='BackgroundGradient_'],
+  [class*='backgroundGrid'],
+  [class*='PixelBackground'],
+  [class*='BackgroundGrid'] {
+    display: none !important;
+  }
+
+  /* Bauhaus typography for Lexical content. */
+  .payload-richtext {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+  }
+  .payload-richtext h1,
+  .payload-richtext h2,
+  .payload-richtext h3,
+  .payload-richtext h4,
+  .payload-richtext h5 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 1.4em 0 0.5em;
+    max-width: 32ch;
+  }
+  .payload-richtext h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+  .payload-richtext h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
+  .payload-richtext h3 { font-size: clamp(1.4rem, 3vw, 2rem); }
+  .payload-richtext p {
+    font-weight: 500;
+    line-height: 1.75;
+    margin-bottom: 1.1em;
+    max-width: 70ch;
+  }
+  .payload-richtext a {
+    color: var(--color-nb-red);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid var(--color-nb-red);
+  }
+  .payload-richtext a:hover {
+    background: var(--color-nb-yellow);
+  }
+  .payload-richtext ul,
+  .payload-richtext ol {
+    margin: 0 0 1.2em;
+    padding-left: 0;
+    max-width: 70ch;
+  }
+  .payload-richtext ul { list-style: none; }
+  .payload-richtext ul li {
+    position: relative;
+    padding-left: 1.9rem;
+    margin-bottom: 0.6rem;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  .payload-richtext ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 0.8rem;
+    height: 0.8rem;
+    background: var(--color-nb-red);
+    border: 2px solid var(--color-ink);
+  }
+  .payload-richtext ol { list-style: decimal; padding-left: 1.5rem; }
+  .payload-richtext ol li { font-weight: 500; margin-bottom: 0.5rem; padding-left: 0.4rem; }
+  .payload-richtext blockquote {
+    border-left: 6px solid var(--color-nb-red);
+    padding-left: 1.25rem;
+    margin: 1.5em 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+  .payload-richtext hr {
+    border: 0;
+    border-top: 4px solid var(--color-ink);
+    margin: 2em 0;
+  }
+  .payload-richtext img,
+  .payload-richtext video {
+    border: 4px solid var(--color-ink);
+    box-shadow: var(--shadow-nb-sm);
+    max-width: 100%;
+    height: auto;
+  }
+  .payload-richtext code {
+    font-family: var(--font-mono);
+    background: var(--color-paper);
+    border: 2px solid var(--color-ink);
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+  }
+  .payload-richtext pre {
+    background: var(--color-ink);
+    color: #fff;
+    border: 4px solid var(--color-ink);
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+  }
+  .payload-richtext pre code {
+    background: none;
+    border: 0;
+    color: inherit;
+  }
+}
