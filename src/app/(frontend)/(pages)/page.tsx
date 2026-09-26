@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { JsonLd } from '@components/SEO/JsonLd'
 import { KotacomBauhausHome } from '@components/nb/Home'
 import { mergeOpenGraph } from '@root/seo/mergeOpenGraph'
+import { localBusinessSchema, organizationSchema, websiteSchema } from '@root/seo/schema'
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -13,5 +15,10 @@ export const metadata: Metadata = {
 }
 
 export default function HomePage() {
-  return <KotacomBauhausHome />
+  return (
+    <React.Fragment>
+      <JsonLd schema={[organizationSchema(), websiteSchema(), localBusinessSchema()]} />
+      <KotacomBauhausHome />
+    </React.Fragment>
+  )
 }

@@ -27,7 +27,7 @@ const fetchCaseStudies = async (): Promise<{ title?: string; slug?: string }[]> 
     const data = await payload.find({
       collection: 'case-studies',
       depth: 0,
-      limit: 100,
+      limit: 500,
       select: { slug: true, title: true },
     })
     return data.docs as { title?: string; slug?: string }[]
