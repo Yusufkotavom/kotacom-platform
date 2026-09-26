@@ -9,6 +9,7 @@ import { Card } from '@components/nb/Card'
 import { Section, SectionTag } from '@components/nb/Section'
 import { buildMetadata } from '@root/seo/metadata'
 import { breadcrumbSchema, collectionPageSchema } from '@root/seo/schema'
+import { uniqueBySlug } from '@root/utilities/uniqueBy'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProductsIndex() {
-  const products = await fetchProducts()
+  const products = uniqueBySlug(await fetchProducts())
 
   const items = products
     .filter((p) => p.slug)

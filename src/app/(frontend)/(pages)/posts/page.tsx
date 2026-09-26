@@ -10,6 +10,7 @@ import { Pill } from '@components/nb/Pill'
 import { Section, SectionTag } from '@components/nb/Section'
 import { buildMetadata } from '@root/seo/metadata'
 import { breadcrumbSchema, collectionPageSchema } from '@root/seo/schema'
+import { uniqueBySlug } from '@root/utilities/uniqueBy'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PostsIndex() {
-  const posts = await fetchPosts()
+  const posts = uniqueBySlug(await fetchPosts())
 
   const items = posts
     .filter((p) => p.slug)

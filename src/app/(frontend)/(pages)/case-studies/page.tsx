@@ -9,6 +9,7 @@ import { Card } from '@components/nb/Card'
 import { Section, SectionTag } from '@components/nb/Section'
 import { mergeOpenGraph } from '@root/seo/mergeOpenGraph'
 import { breadcrumbSchema, collectionPageSchema } from '@root/seo/schema'
+import { uniqueBySlug } from '@root/utilities/uniqueBy'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,7 @@ const fetchCaseStudies = async (): Promise<{ title?: string; slug?: string }[]> 
 }
 
 export default async function CaseStudiesIndex() {
-  const studies = await fetchCaseStudies()
+  const studies = uniqueBySlug(await fetchCaseStudies())
 
   return (
     <React.Fragment>
