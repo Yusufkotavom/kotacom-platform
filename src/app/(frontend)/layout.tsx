@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 
 import { GoogleAnalytics } from '@components/Analytics/GoogleAnalytics/index'
 import { GoogleTagManager } from '@components/Analytics/GoogleTagManager/index'
+import { FloatingContact } from '@components/FloatingContact/index'
 import { Providers } from '@providers/index'
 import { PrivacyProvider } from '@root/providers/Privacy/index'
 import { themeInitScript } from '@root/providers/Theme/shared'
@@ -67,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PrivacyProvider>
           <Providers>{children}</Providers>
         </PrivacyProvider>
+        <FloatingContact />
       </body>
     </html>
   )

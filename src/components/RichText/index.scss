@@ -1,7 +1,11 @@
 @use '@scss/common' as *;
 
 .payload-richtext {
-  @include color-links;
+  // Bauhaus front-end owns link styling (red #d02020 with hover, see
+  // globals.css). We intentionally do NOT `@include color-links` here because
+  // that mixin paints links with `--theme-blue-*`, which is undefined on the
+  // Bauhaus canvas and left links washed-out/blue. Keep body copy stark ink.
+  color: #121212;
 
   &:not(.docs-richtext) {
     :first-child {
