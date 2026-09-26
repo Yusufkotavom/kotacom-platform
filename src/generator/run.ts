@@ -1,6 +1,6 @@
 import type { BasePayload } from 'payload'
 
-import { buildStructurePrompt, generatePlan, normalizePlan } from './plan'
+import { buildStructurePrompt, generateLightPlan, generatePlan, normalizePlan } from './plan'
 import { extractJson } from './plan'
 import { aiConfigured, aiInfo, extractAiPrompts, replacePromptsIn } from './ai'
 import { buildDraft } from './render'
@@ -254,17 +254,24 @@ export const runProgram = async (
   const existing = await loadExisting(payload, entityType, program.id)
 
   const report: RowReport[] = []
-  let aiNeeded = mode === 'generate'
+  const aiNeeded = mode === 'generate'
+  const collection = entityType === 'post' ? 'posts' : 'pages'
+  // With a template skeleton the AI only needs title/meta/hero (light plan);
+  // without one the full plan is required to synthesise the blocks.
+  const light = (template.layout ?? []).length > 0
+  const poolSize = Math.max(1, Math.min(Number(process.env.GENERATOR_CONCURRENCY ?? 6), 8))
 
-  for (const row of rows) {
+  const processRow = async (row: GeneratorRow): Promise<RowReport> => {
     const tokens = buildTokens(template, row)
 
-    // 1) Optional full content plan (drives fallback blocks + title/meta).
+    // 1) Optional content plan (drives fallback blocks + title/meta).
     let plan: ContentPlan | null = null
     if (aiNeeded && aiConfigured()) {
       for (let attempt = 0; attempt < 2 && !plan; attempt += 1) {
         try {
-          plan = await generatePlan({ entityType, row, template, tokens })
+          plan = light
+            ? await generateLightPlan({ entityType, row, template, tokens })
+            : await generatePlan({ entityType, row, template, tokens })
         } catch (err) {
           if (attempt === 1) {
             payload.logger.warn(`[generator] plan gagal utk baris ${row.key}: ${(err as Error)?.message}`)
@@ -306,29 +313,21 @@ export const runProgram = async (
       title: draft.title,
     }
 
-    if (mode !== 'generate' || qa.severity === 'blocked') {
-      report.push(entry)
-      continue
-    }
+    if (mode !== 'generate' || qa.severity === 'blocked') return entry
 
     // 6) Write.
     const duplicate = existing.find((doc) => doc.slug === draft.slug)
     try {
       const data = toPayloadData(draft)
       if (duplicate && writeMode === 'overwrite') {
-        await payload.update({
-          collection: entityType === 'post' ? 'posts' : 'pages',
-          data,
-          id: duplicate.id,
-          overrideAccess: true,
-        })
+        await payload.update({ collection, data, id: duplicate.id, overrideAccess: true })
         entry.action = 'updated'
         entry.docId = duplicate.id
       } else if (duplicate && writeMode === 'create') {
         entry.action = 'skipped'
       } else {
         const created = (await payload.create({
-          collection: entityType === 'post' ? 'posts' : 'pages',
+          collection,
           data: data as never,
           overrideAccess: true,
         })) as unknown as AnyObj
@@ -349,8 +348,23 @@ export const runProgram = async (
       entry.severity = 'blocked'
     }
 
-    report.push(entry)
+    return entry
   }
+
+  // Bounded worker pool: AI enrichment is network-bound, so a few concurrent
+  // rows cut a bulk run from hours to minutes. Row errors are caught inside
+  // processRow, so a rejection here would be unexpected and is left to surface.
+  let cursor = 0
+  const worker = async (): Promise<void> => {
+    while (cursor < rows.length) {
+      const idx = cursor
+      cursor += 1
+      const row = rows[idx]
+      if (!row) break
+      report.push(await processRow(row))
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(poolSize, rows.length || 1) }, worker))
 
   const totals = {
     blocked: report.filter((r) => r.severity === 'blocked').length,

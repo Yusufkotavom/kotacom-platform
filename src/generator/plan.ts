@@ -161,3 +161,39 @@ export const generatePlan = async (input: StructureInput): Promise<ContentPlan> 
   if (!json) throw new Error('AI tidak mengembalikan JSON valid')
   return normalizePlan(json)
 }
+
+/**
+ * LIGHT plan: when the template already ships a full block skeleton, only
+ * title + SEO meta + hero subheadline come from the AI (the rest of the copy is
+ * written by the template's `aiContent` blocks). This keeps each row's AI cost
+ * small so bulk runs stay practical.
+ */
+export const buildLightPrompt = (input: StructureInput): string => {
+  const { entityType, row, template, tokens } = input
+  const isPost = entityType === 'post'
+  return [
+    `Buat METADATA SEO ringkas dan UNIK untuk ${isPost ? 'artikel blog' : 'landing page layanan'} Kotacom berikut.`,
+    `\nDATA:`,
+    `- Kata kunci utama: ${tokens.primaryKeyword || row.primaryKeyword}`,
+    `- Layanan: ${tokens.service || '-'}`,
+    `- Kota/lokasi: ${tokens.city || '-'}`,
+    `- Penawaran/angle: ${tokens.offer || '-'}`,
+    `- Konteks lokal unik: ${tokens.localCondition || '-'}`,
+    template.seoTitlePattern ? `- Pola judul SEO: ${template.seoTitlePattern}` : '',
+    `\nAturan: judul H1 unik (noun phrase, mengandung kata kunci, sebut kota bila ada); metaTitle 45-60 karakter; metaDescription WAJIB 120-155 karakter, persuasif; heroSubheadline 1 kalimat. Jangan mengarang data statistik/testimoni.`,
+    `\nBalas HANYA JSON valid:`,
+    `{"title":"...","metaTitle":"...","metaDescription":"...","heroSubheadline":"..."}`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+/** Generate a compact plan (title/meta/hero only) — used when a template skeleton exists. */
+export const generateLightPlan = async (input: StructureInput): Promise<ContentPlan> => {
+  // 4096: the reasoning model burns tokens on hidden reasoning *before* emitting
+  // the (short) JSON, so a tight budget truncates the reply to nothing.
+  const raw = await aiChat(buildLightPrompt(input), { maxTokens: 4096 })
+  const json = extractJson(raw)
+  if (!json) throw new Error('AI tidak mengembalikan JSON valid')
+  return normalizePlan(json)
+}
