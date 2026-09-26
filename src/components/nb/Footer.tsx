@@ -12,17 +12,27 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
   {
     title: 'Layanan',
     links: [
-      { label: 'Website', href: '/layanan/website' },
-      { label: 'Software', href: '/layanan/software' },
-      { label: 'IT Support', href: '/layanan/it-support' },
-      { label: 'Percetakan', href: '/layanan/percetakan' },
+      { label: 'Cetak Buku', href: '/produk/cetak-buku' },
+      { label: 'Kemasan Produk', href: '/produk/kemasan-produk' },
+      { label: 'Company Profile', href: '/produk/company-profile' },
+      { label: 'Sistem Digital', href: '/produk/sistem-digital' },
+      { label: 'Semua Produk', href: '/produk' },
+    ],
+  },
+  {
+    title: 'Perusahaan',
+    links: [
+      { label: 'Tentang Kami', href: '/tentang' },
+      { label: 'Studi Kasus', href: '/case-studies' },
+      { label: 'Blog', href: '/posts' },
+      { label: 'Kontak', href: '/kontak' },
     ],
   },
   {
     title: 'Kontak',
     links: [
-      { label: 'WhatsApp', href: '#' },
-      { label: 'Surabaya, ID', href: '/tentang' },
+      { label: 'WhatsApp', href: 'https://wa.me/6285799520350' },
+      { label: 'Surabaya, ID', href: '/kontak' },
       { label: 'EST. 2008', href: '/tentang' },
     ],
   },
@@ -37,7 +47,7 @@ export function Footer({
 }) {
   return (
     <footer className="border-t-4 border-ink bg-ink text-white">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
           <span className="inline-flex items-center gap-2 text-xl font-black uppercase tracking-tight">
             <span className="inline-flex items-center">

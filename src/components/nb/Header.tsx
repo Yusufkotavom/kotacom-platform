@@ -11,10 +11,11 @@ export interface NavItem {
 }
 
 const FALLBACK: NavItem[] = [
-  { label: 'Layanan', href: '#layanan' },
-  { label: 'Cara Kerja', href: '#cara-kerja' },
-  { label: 'Portofolio', href: '#portofolio' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Layanan', href: '/produk' },
+  { label: 'Studi Kasus', href: '/case-studies' },
+  { label: 'Blog', href: '/posts' },
+  { label: 'Tentang', href: '/tentang' },
+  { label: 'Kontak', href: '/kontak' },
 ]
 
 /** Geometric Bauhaus wordmark: circle + rotated square + triangle. */
