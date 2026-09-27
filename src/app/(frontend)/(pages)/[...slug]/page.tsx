@@ -2,6 +2,7 @@ import { buildSafe } from '@root/utilities/buildSafe'
 import type { Metadata } from 'next'
 
 import { BauhausBlocks } from '@components/nb/blocks/index'
+import { ErrorBoundary } from '@components/ErrorTest'
 import { Hero } from '@components/Hero/index'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { PayloadRedirects } from '@components/PayloadRedirects'
@@ -49,8 +50,10 @@ const Page = async ({
         )}
       />
       */}
-      <Hero firstContentBlock={page.layout[0]} page={page} />
-      <BauhausBlocks blocks={page.layout} />
+      <ErrorBoundary>
+        <Hero firstContentBlock={page.layout[0]} page={page} />
+        <BauhausBlocks blocks={page.layout} />
+      </ErrorBoundary>
     </React.Fragment>
   )
 }
