@@ -10,12 +10,20 @@ export interface NavItem {
   href: string
 }
 
+/** Canonical WhatsApp number for the whole site (see SiteSettings default). */
+export const WHATSAPP_HREF =
+  'https://wa.me/6285799520350?text=' +
+  encodeURIComponent('Halo Kotacom, saya ingin konsultasi mengenai layanan Anda.')
+
+/** Primary navigation, aligned with the live kotacom.id URL structure. */
 const FALLBACK: NavItem[] = [
-  { label: 'Layanan', href: '/produk' },
-  { label: 'Studi Kasus', href: '/case-studies' },
-  { label: 'Blog', href: '/posts' },
-  { label: 'Tentang', href: '/tentang' },
-  { label: 'Kontak', href: '/kontak' },
+  { label: 'Web Dev', href: '/pembuatan-website' },
+  { label: 'Software', href: '/software' },
+  { label: 'IT Service', href: '/layanan' },
+  { label: 'Percetakan', href: '/percetakan' },
+  { label: 'Portfolio', href: '/projects' },
+  { label: 'Produk', href: '/products' },
+  { label: 'Blog', href: '/blog' },
 ]
 
 /** Geometric Bauhaus wordmark: circle + rotated square + triangle. */
@@ -34,7 +42,7 @@ export function Logo({ className }: { className?: string }) {
 
 export function Header({
   items = FALLBACK,
-  whatsapp = '#',
+  whatsapp = WHATSAPP_HREF,
 }: {
   items?: NavItem[]
   whatsapp?: string
