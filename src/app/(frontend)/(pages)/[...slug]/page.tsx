@@ -39,6 +39,7 @@ const Page = async ({
     <React.Fragment>
       <PayloadRedirects disableNotFound url={url} />
       <RefreshRouteOnSave />
+      {/* DEBUG: Disabled JsonLd
       <JsonLd
         schema={breadcrumbSchema(
           (page.breadcrumbs || []).map((b) => ({
@@ -47,6 +48,7 @@ const Page = async ({
           })),
         )}
       />
+      */}
       <Hero firstContentBlock={page.layout[0]} page={page} />
       <BauhausBlocks blocks={page.layout} />
     </React.Fragment>
