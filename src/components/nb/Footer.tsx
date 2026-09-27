@@ -22,9 +22,9 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
   {
     title: 'Perusahaan',
     links: [
-      { label: 'Portfolio', href: '/projects' },
-      { label: 'Produk', href: '/products' },
-      { label: 'Blog', href: '/blog' },
+      { label: 'Studi Kasus', href: '/case-studies' },
+      { label: 'Produk', href: '/produk' },
+      { label: 'Blog', href: '/posts' },
       { label: 'Kontak', href: '/contact' },
     ],
   },

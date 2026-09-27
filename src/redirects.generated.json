@@ -301,7 +301,7 @@
   },
   {
     "source": "/product/low-budget-pc-rakitan-gaming-core-i5-2400-8gb-1030-2gb-rakit-pc-2",
-    "destination": "/produk/low-budget-pc-rakitan-gaming-core-i5-2400-8gb-1030-2gb-rakit-pc-2",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -536,7 +536,7 @@
   },
   {
     "source": "/product/pc-rakitan-gaming-ryzen-5-2200g-8gb-500gb-rakit-pc-surabaya-2",
-    "destination": "/produk/pc-rakitan-gaming-ryzen-5-2200g-8gb-500gb-rakit-pc-surabaya-2",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -1631,7 +1631,7 @@
   },
   {
     "source": "/it-infrastructure-planning-surabaya",
-    "destination": "/produk",
+    "destination": "/posts/it-infrastructure-planning-surabaya",
     "permanent": true
   },
   {
@@ -1656,7 +1656,7 @@
   },
   {
     "source": "/products/batik-tulis-premium-jogja",
-    "destination": "/produk/batik-tulis-premium-jogja",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -1676,7 +1676,7 @@
   },
   {
     "source": "/products/tas-rotan-lombok-handmade",
-    "destination": "/produk/tas-rotan-lombok-handmade",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -1936,7 +1936,7 @@
   },
   {
     "source": "/web-design-responsive-surabaya",
-    "destination": "/produk",
+    "destination": "/posts/web-design-responsive-surabaya",
     "permanent": true
   },
   {
@@ -1991,7 +1991,7 @@
   },
   {
     "source": "/products/dodol-betawi-jakarta",
-    "destination": "/produk/dodol-betawi-jakarta",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2061,7 +2061,7 @@
   },
   {
     "source": "/blog/web-developer-terdekat",
-    "destination": "/posts/web-developer-terdekat",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -2131,7 +2131,7 @@
   },
   {
     "source": "/product/kalender-dinding-2",
-    "destination": "/produk/kalender-dinding-2",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2386,7 +2386,7 @@
   },
   {
     "source": "/products/sample-product",
-    "destination": "/produk/sample-product",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2666,7 +2666,7 @@
   },
   {
     "source": "/products/tradisional",
-    "destination": "/produk/tradisional",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2686,7 +2686,7 @@
   },
   {
     "source": "/blog/jasa-it-support",
-    "destination": "/posts/jasa-it-support",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -2711,7 +2711,7 @@
   },
   {
     "source": "/blog/custom-software",
-    "destination": "/posts/custom-software",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -2731,7 +2731,7 @@
   },
   {
     "source": "/products/percetakan",
-    "destination": "/produk/percetakan",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2761,7 +2761,7 @@
   },
   {
     "source": "/products/pc-karaoke",
-    "destination": "/produk/pc-karaoke",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2806,7 +2806,7 @@
   },
   {
     "source": "/products/akuntansi",
-    "destination": "/produk/akuntansi",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2851,7 +2851,7 @@
   },
   {
     "source": "/blog/mobile-first",
-    "destination": "/posts/mobile-first",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -2866,12 +2866,12 @@
   },
   {
     "source": "/products/rakit-pc",
-    "destination": "/produk/rakit-pc",
+    "destination": "/produk",
     "permanent": true
   },
   {
     "source": "/products/software",
-    "destination": "/produk/software",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2896,12 +2896,12 @@
   },
   {
     "source": "/products/game-pc",
-    "destination": "/produk/game-pc",
+    "destination": "/produk",
     "permanent": true
   },
   {
     "source": "/products/monitor",
-    "destination": "/produk/monitor",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2916,7 +2916,7 @@
   },
   {
     "source": "/products/fashion",
-    "destination": "/produk/fashion",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2956,7 +2956,7 @@
   },
   {
     "source": "/products/produk",
-    "destination": "/produk/produk",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -2971,7 +2971,7 @@
   },
   {
     "source": "/blog-4/page/35",
-    "destination": "/posts-4/page/35",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -3016,7 +3016,7 @@
   },
   {
     "source": "/blog/surabaya",
-    "destination": "/posts/surabaya",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -3061,7 +3061,7 @@
   },
   {
     "source": "/blog/startup",
-    "destination": "/posts/startup",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -3126,12 +3126,12 @@
   },
   {
     "source": "/products/2",
-    "destination": "/produk/2",
+    "destination": "/produk",
     "permanent": true
   },
   {
     "source": "/products/3",
-    "destination": "/produk/3",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -3141,12 +3141,7 @@
   },
   {
     "source": "/products/5",
-    "destination": "/produk/5",
-    "permanent": true
-  },
-  {
-    "source": "/index-old",
-    "destination": "/",
+    "destination": "/produk",
     "permanent": true
   },
   {
@@ -3226,12 +3221,12 @@
   },
   {
     "source": "/blog-2",
-    "destination": "/posts-2",
+    "destination": "/posts",
     "permanent": true
   },
   {
     "source": "/blog-4",
-    "destination": "/posts-4",
+    "destination": "/posts",
     "permanent": true
   },
   {
@@ -3246,11 +3241,6 @@
   },
   {
     "source": "/shop-2",
-    "destination": "/produk",
-    "permanent": true
-  },
-  {
-    "source": "/home",
     "destination": "/produk",
     "permanent": true
   },

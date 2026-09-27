@@ -72,6 +72,13 @@ export const jsxConverters: (args: { toc?: boolean }) => JSXConvertersFunction<N
       upload: ({ node }) => {
         return <RichTextUpload node={node} />
       },
+      list: ({ node, nodesToJSX }) => {
+        const Tag = node.listType === 'number' ? 'ol' : 'ul'
+        return <Tag className={`list-inside ${node.listType === 'number' ? 'list-decimal' : 'list-disc'} mb-4 pl-4`}>{nodesToJSX({ nodes: node.children })}</Tag>
+      },
+      listitem: ({ node, nodesToJSX }) => {
+        return <li className="mb-1">{nodesToJSX({ nodes: node.children })}</li>
+      },
     }
 
     return converters

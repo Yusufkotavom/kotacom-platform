@@ -15,15 +15,17 @@ export const WHATSAPP_HREF =
   'https://wa.me/6285799520350?text=' +
   encodeURIComponent('Halo Kotacom, saya ingin konsultasi mengenai layanan Anda.')
 
-/** Primary navigation, aligned with the live kotacom.id URL structure. */
+/** Primary navigation. Canonical in-app routes are used directly
+ * (/case-studies, /produk, /posts); the CMS-driven slugs (pembuatan-website,
+ * software, layanan, percetakan) resolve through the [...slug] catch-all. */
 const FALLBACK: NavItem[] = [
   { label: 'Web Dev', href: '/pembuatan-website' },
   { label: 'Software', href: '/software' },
   { label: 'IT Service', href: '/layanan' },
   { label: 'Percetakan', href: '/percetakan' },
-  { label: 'Portfolio', href: '/projects' },
-  { label: 'Produk', href: '/products' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Studi Kasus', href: '/case-studies' },
+  { label: 'Produk', href: '/produk' },
+  { label: 'Blog', href: '/posts' },
 ]
 
 /** Geometric Bauhaus wordmark: circle + rotated square + triangle. */

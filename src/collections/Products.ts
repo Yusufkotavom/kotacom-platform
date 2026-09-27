@@ -145,9 +145,15 @@ export const Products: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ doc }) => {
-        revalidatePath(`/produk/${doc.slug}`)
-        revalidatePath('/produk', 'page')
-        console.log(`Revalidated: /produk/${doc.slug}`)
+        // Guard: revalidatePath throws outside a Next.js request/render scope
+        // (e.g. when seeding via the Local API in a plain script). Skip safely.
+        try {
+          revalidatePath(`/produk/${doc.slug}`)
+          revalidatePath('/produk', 'page')
+          console.log(`Revalidated: /produk/${doc.slug}`)
+        } catch {
+          /* no-op outside request scope */
+        }
       },
     ],
   },
