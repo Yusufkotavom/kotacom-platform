@@ -236,10 +236,10 @@ const main = async () => {
       slug,
       meta: {
         title: (() => {
-          const suffix = ' | Kotacom'
-          const max = 70 - suffix.length
-          const base = title.length > max ? title.slice(0, max - 1).trim() + '…' : title
-          return base + suffix
+          // The SEO plugin appends the site name, so keep just the page title
+          // (trimmed to the 70-char field limit) to avoid a doubled suffix.
+          const t = title.trim()
+          return t.length > 70 ? t.slice(0, 69).trim() + '…' : t
         })(),
         description: (proj.excerpt || `Portofolio ${title} oleh Kotacom.`).slice(0, 155),
       },
