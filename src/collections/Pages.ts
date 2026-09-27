@@ -110,22 +110,28 @@ export const Pages: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ doc, previousDoc }) => {
-        if (doc._status === 'published' || doc._status !== previousDoc._status) {
-          if (doc.breadcrumbs && doc.breadcrumbs.length > 0) {
-            revalidatePath(doc.breadcrumbs[doc.breadcrumbs.length - 1].url)
-            console.log(`Revalidated: ${doc.breadcrumbs[doc.breadcrumbs.length - 1].url}`)
-            if (doc.breadcrumbs[0].url === '/home') {
-              revalidatePath('/')
-              console.log(`Revalidated: /`)
-            }
-          } else {
-            revalidatePath(`/${doc.slug}`)
-            console.log(`Revalidated: /${doc.slug}`)
-            if (doc.slug === 'home') {
-              revalidatePath('/')
-              console.log(`Revalidated: /`)
+        // Guard: revalidatePath throws outside a Next.js request/render scope
+        // (e.g. seeding via the Local API in a plain script). Skip safely.
+        try {
+          if (doc._status === 'published' || doc._status !== previousDoc._status) {
+            if (doc.breadcrumbs && doc.breadcrumbs.length > 0) {
+              revalidatePath(doc.breadcrumbs[doc.breadcrumbs.length - 1].url)
+              console.log(`Revalidated: ${doc.breadcrumbs[doc.breadcrumbs.length - 1].url}`)
+              if (doc.breadcrumbs[0].url === '/home') {
+                revalidatePath('/')
+                console.log(`Revalidated: /`)
+              }
+            } else {
+              revalidatePath(`/${doc.slug}`)
+              console.log(`Revalidated: /${doc.slug}`)
+              if (doc.slug === 'home') {
+                revalidatePath('/')
+                console.log(`Revalidated: /`)
+              }
             }
           }
+        } catch {
+          /* no-op outside request scope */
         }
       },
     ],
