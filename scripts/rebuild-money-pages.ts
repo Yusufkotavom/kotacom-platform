@@ -260,6 +260,10 @@ const main = async () => {
         collection: 'pages',
         id: doc.id,
         data: {
+          title,
+          fullTitle: title,
+          description,
+          breadcrumbs: [{ label: title, url: `/${slug}` }],
           hero,
           layout,
           _status: 'published',
