@@ -735,7 +735,41 @@ export interface Page {
       placeholder?: string | null;
       description?: string | null;
     };
-    buttons?: unknown[] | null;
+    buttons?:
+      | (
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'case-studies';
+                      value: string | CaseStudy;
+                    } | null);
+                url?: string | null;
+                label: string;
+                customId?: string | null;
+              };
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'link';
+            }
+          | {
+              command: string;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'command';
+            }
+        )[]
+      | null;
     secondaryButtons?:
       | {
           link: {
@@ -3681,7 +3715,33 @@ export interface PagesSelect<T extends boolean = true> {
               placeholder?: T;
               description?: T;
             };
-        buttons?: T | {};
+        buttons?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          customId?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              command?:
+                | T
+                | {
+                    command?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
         secondaryButtons?:
           | T
           | {
