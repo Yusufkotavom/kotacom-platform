@@ -40,7 +40,9 @@ export const Hero: React.FC<{
     page,
   } = props
 
-  const HeroToRender = heroes[type] as any
+  // DEBUG: Fallback ke default jika type tidak ada
+  const HeroType = type || 'default'
+  const HeroToRender = heroes[HeroType] as any
 
   if (HeroToRender) {
     return (
@@ -57,5 +59,17 @@ export const Hero: React.FC<{
     )
   }
 
-  return null
+  console.warn(`Unknown hero type: ${type}, falling back to default`)
+  const DefaultHero = heroes.default as any
+  return DefaultHero ? (
+    <>
+      <BreadcrumbsBar breadcrumbs={breadcrumbs} hero={hero} />
+      <DefaultHero
+        {...hero}
+        breadcrumbs={breadcrumbs}
+        firstContentBlock={firstContentBlock}
+        pageTitle={page.title}
+      />
+    </>
+  ) : null
 }
