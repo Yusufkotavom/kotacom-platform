@@ -8,9 +8,9 @@
 
 type LexNode = Record<string, unknown>
 
-const textNode = (text: string): LexNode => ({
+const textNode = (text: string, format = 0): LexNode => ({
   detail: 0,
-  format: 0,
+  format,
   mode: 'normal',
   style: '',
   text,
@@ -18,8 +18,23 @@ const textNode = (text: string): LexNode => ({
   version: 1,
 })
 
+/** Split a string on `**bold**` into text nodes, applying Lexical bold (format 1)
+ * to the bold segments. Falls back to a single plain node when there's no bold. */
+const inlineNodes = (text: string): LexNode[] => {
+  if (!text.includes('**')) return [textNode(text)]
+  const nodes: LexNode[] = []
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  for (const part of parts) {
+    if (!part) continue
+    const m = /^\*\*([^*]+)\*\*$/.exec(part)
+    if (m) nodes.push(textNode(m[1], 1))
+    else nodes.push(textNode(part))
+  }
+  return nodes.length ? nodes : [textNode(text)]
+}
+
 const paragraphNode = (text: string): LexNode => ({
-  children: [textNode(text)],
+  children: inlineNodes(text),
   direction: 'ltr',
   format: '',
   indent: 0,
@@ -30,7 +45,7 @@ const paragraphNode = (text: string): LexNode => ({
 })
 
 const headingNode = (text: string, tag: 'h2' | 'h3' | 'h4'): LexNode => ({
-  children: [textNode(text)],
+  children: inlineNodes(text),
   direction: 'ltr',
   format: '',
   indent: 0,
@@ -41,7 +56,7 @@ const headingNode = (text: string, tag: 'h2' | 'h3' | 'h4'): LexNode => ({
 
 const listNode = (items: string[], listType: 'bullet' | 'number'): LexNode => ({
   children: items.map((item) => ({
-    children: [textNode(item)],
+    children: inlineNodes(item),
     direction: 'ltr',
     format: '',
     indent: 0,

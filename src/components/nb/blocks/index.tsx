@@ -304,6 +304,23 @@ function findLinks(fields: any): AnyLink[] {
   return out.slice(0, 4)
 }
 
+/**
+ * `aiContent` block: render the AI-authored `generatedText`, falling back to the
+ * manual `content` richText. Prompt/model/tokens are authoring metadata and are
+ * never rendered on the front-end.
+ */
+function AiContentBlock({ fields, id }: { fields: any; id?: string }) {
+  const content = fields?.generatedText || fields?.content
+  if (!content) return null
+  return (
+    <Section bg="canvas" id={id}>
+      <div className="payload-richtext mx-auto max-w-3xl">
+        <RichText content={content} />
+      </div>
+    </Section>
+  )
+}
+
 function GenericBlock({ fields, id }: { fields: any; id?: string }) {
   const shapes = ['circle', 'square', 'triangle', 'diamond'] as const
   const tones = ['yellow', 'blue', 'red', 'yellow'] as const
@@ -555,6 +572,7 @@ function ComparisonTableBlock({ fields }: { fields: any; id?: string }) {
 
 const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   content: ContentBlock,
+  aiContent: AiContentBlock,
   cardGrid: CardGridBlock,
   steps: StepsBlock,
   mediaBlock: MediaBlock,

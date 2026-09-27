@@ -159,6 +159,24 @@
   .payload-richtext h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
   .payload-richtext h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
   .payload-richtext h3 { font-size: clamp(1.4rem, 3vw, 2rem); }
+  /* Turn each major (h2) section into a scannable block: an accent rule above
+     the heading breaks a long article into visual sections instead of one raw
+     wall of text. The first h2 in a block skips the rule. */
+  .payload-richtext h2 {
+    margin-top: 2.2em;
+    padding-top: 1.4em;
+    border-top: 4px solid var(--color-ink);
+  }
+  .payload-richtext > h2:first-child,
+  .payload-richtext h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .payload-richtext h3 {
+    padding-left: 0.9rem;
+    border-left: 6px solid var(--color-nb-red);
+  }
   .payload-richtext p {
     font-weight: 500;
     line-height: 1.75;
