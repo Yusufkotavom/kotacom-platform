@@ -3,10 +3,12 @@ import type { Metadata, Viewport } from 'next'
 import { GoogleAnalytics } from '@components/Analytics/GoogleAnalytics/index'
 import { GoogleTagManager } from '@components/Analytics/GoogleTagManager/index'
 import { FloatingContact } from '@components/FloatingContact/index'
+import { JsonLd } from '@components/SEO/JsonLd'
 import { Providers } from '@providers/index'
 import { PrivacyProvider } from '@root/providers/Privacy/index'
 import { themeInitScript } from '@root/providers/Theme/shared'
 import { mergeOpenGraph } from '@root/seo/mergeOpenGraph'
+import { organizationSchema, websiteSchema } from '@root/seo/schema'
 import React from 'react'
 
 import { outfit, untitledSans } from './fonts'
@@ -61,6 +63,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/images/favicon.svg" rel="icon" type="image/svg+xml" />
         <link href="https://www.googletagmanager.com" rel="preconnect" />
         <link href="https://www.google-analytics.com" rel="preconnect" />
+        {/* Site-wide base graph: Organization + WebSite (with SearchAction).
+            Present on every page so entity pages can reference @id nodes. */}
+        <JsonLd schema={[organizationSchema(), websiteSchema()]} />
         <GoogleAnalytics />
       </head>
       <body>

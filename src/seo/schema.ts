@@ -198,6 +198,102 @@ export const itemListSchema = (items: { name: string; url: string }[]): Schema =
   })),
 })
 
+/** WebPage — generic page node, tied into the site graph. */
+export const webPageSchema = (opts: {
+  name: string
+  url: string
+  description?: string | null
+  image?: string
+  datePublished?: string | null
+  dateModified?: string | null
+}): Schema => ({
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${abs(opts.url)}#webpage`,
+  name: opts.name,
+  url: abs(opts.url),
+  description: opts.description || undefined,
+  image: opts.image || undefined,
+  datePublished: opts.datePublished || undefined,
+  dateModified: opts.dateModified || opts.datePublished || undefined,
+  isPartOf: { '@id': `${base}/#website` },
+  about: { '@id': `${base}/#organization` },
+  inLanguage: 'id-ID',
+})
+
+/* -------------------------------------------------------------------------- */
+/* Lexical content extraction — pull FAQ pairs & a description out of a page's */
+/* `content` blocks so service/landing pages emit FAQPage + a real meta desc.  */
+/* -------------------------------------------------------------------------- */
+
+type LexNode = { type?: string; tag?: string; text?: string; children?: LexNode[] }
+
+const nodeText = (node?: LexNode): string => {
+  if (!node) return ''
+  const out: string[] = []
+  const walk = (n: LexNode) => {
+    if (typeof n.text === 'string') out.push(n.text)
+    if (Array.isArray(n.children)) n.children.forEach(walk)
+  }
+  walk(node)
+  return out.join(' ').replace(/\s+/g, ' ').trim()
+}
+
+/** Extract FAQ {question, answer} pairs from a page/product `layout` (looks for
+ * a `content` block whose richText has an h2 "Pertanyaan…" followed by h3 Q + p A). */
+export const extractFaqsFromLayout = (
+  layout?: unknown,
+): { question: string; answer: string }[] => {
+  if (!Array.isArray(layout)) return []
+  const faqs: { question: string; answer: string }[] = []
+  for (const block of layout as Record<string, unknown>[]) {
+    const rt = (block?.contentFields as Record<string, unknown>)?.columnOne as
+      | { root?: LexNode }
+      | undefined
+    const root = rt?.root
+    if (!root?.children) continue
+    let inFaq = false
+    let currentQ = ''
+    for (const child of root.children) {
+      const isHeading = child.type === 'heading'
+      const tag = child.tag
+      const text = nodeText(child)
+      if (isHeading && tag === 'h2') {
+        inFaq = /pertanyaan|faq|tanya/i.test(text)
+        currentQ = ''
+        continue
+      }
+      if (!inFaq) continue
+      if (isHeading && (tag === 'h3' || tag === 'h4')) {
+        currentQ = text
+      } else if (child.type === 'paragraph' && currentQ && text) {
+        faqs.push({ question: currentQ, answer: text })
+        currentQ = ''
+      }
+    }
+  }
+  return faqs
+}
+
+/** First meaningful paragraph across a page/product `layout` — a real description. */
+export const extractDescriptionFromLayout = (layout?: unknown): string => {
+  if (!Array.isArray(layout)) return ''
+  for (const block of layout as Record<string, unknown>[]) {
+    const rt = (block?.contentFields as Record<string, unknown>)?.columnOne as
+      | { root?: LexNode }
+      | undefined
+    const root = rt?.root
+    if (!root?.children) continue
+    for (const child of root.children) {
+      if (child.type === 'paragraph') {
+        const t = nodeText(child)
+        if (t && t.length > 40) return t
+      }
+    }
+  }
+  return ''
+}
+
 /** CollectionPage — a hub page that lists other entities (e.g. /produk, /case-studies). */
 export const collectionPageSchema = (opts: {
   name: string

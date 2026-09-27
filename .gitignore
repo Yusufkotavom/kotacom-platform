@@ -30,6 +30,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# Kiro MCP config — contains a Bearer API key, must never be published
+.kiro/settings/mcp.json
+
 # vercel
 .vercel
 

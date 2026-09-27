@@ -6,7 +6,12 @@ import { PayloadRedirects } from '@components/PayloadRedirects/index'
 import { RefreshRouteOnSave } from '@components/RefreshRouterOnSave/index'
 import { fetchProduct, fetchProducts } from '@data'
 import { buildMetadata } from '@root/seo/metadata'
-import { breadcrumbSchema, productSchema } from '@root/seo/schema'
+import {
+  breadcrumbSchema,
+  extractFaqsFromLayout,
+  faqSchema,
+  productSchema,
+} from '@root/seo/schema'
 import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import React from 'react'
@@ -46,6 +51,10 @@ const ProductBySlug = async ({ params }) => {
             { name: product.title, url: `/produk/${slug}` },
           ]),
           productSchema(product),
+          ...(() => {
+            const faqs = extractFaqsFromLayout((product as { layout?: unknown }).layout)
+            return faqs.length ? [faqSchema(faqs)] : []
+          })(),
         ]}
       />
       <BauhausProduct product={product} />
