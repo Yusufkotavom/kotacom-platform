@@ -1,16 +1,10 @@
 'use client'
+
 import type { CMSLinkType } from '@components/CMSLink/index'
 import type { Page } from '@root/payload-types'
-
-import { Breadcrumbs } from '@components/Breadcrumbs/index'
-import { ChangeHeaderTheme } from '@components/ChangeHeaderTheme/index'
-import { CMSLink } from '@components/CMSLink/index'
-import { Gutter } from '@components/Gutter/index'
-import { ChevronIcon } from '@root/icons/ChevronIcon/index'
-import { useThemePreference } from '@root/providers/Theme/index'
-import React, { useEffect, useMemo, useState } from 'react'
-
-import classes from './index.module.scss'
+import Link from 'next/link'
+import React, { useMemo } from 'react'
+import { HeroLinkButton } from '../shared'
 
 interface HeroProps {
   hero: Page['hero']
@@ -33,114 +27,63 @@ const BreadcrumbsBar: React.FC<Props> = ({
   hero,
   links: linksFromProps,
 }) => {
-  const { theme: themeFromContext } = useThemePreference()
-  const [themeState, setThemeState] = useState<Page['hero']['theme']>(hero?.theme)
-
-  const hasBackground = () => {
-    if (hero) {
-      switch (hero.type) {
-        case 'gradient':
-          return Boolean(hero.fullBackground)
-        case 'home':
-          return true
-        case 'three':
-          return true
-        default:
-          return false
-      }
-    } else {
-      return false
-    }
-  }
-
   const links = hero?.breadcrumbsBarLinks ?? linksFromProps
-  const enableBreadcrumbsBar = linksFromProps ?? hero?.enableBreadcrumbsBar
-
-  useEffect(() => {
-    if (hero?.theme) {
-      setThemeState(hero.theme)
-    } else if (themeFromContext) {
-      setThemeState(themeFromContext)
-    }
-  }, [themeFromContext, hero])
+  const enableBreadcrumbsBar = Boolean(linksFromProps ?? hero?.enableBreadcrumbsBar)
 
   const breadcrumbs = useMemo(() => {
-    return breadcrumbsProps ?? []
+    return (breadcrumbsProps ?? []).filter((b) => Boolean(b && b.label))
   }, [breadcrumbsProps])
 
-  const useTheme = hasBackground() ? 'dark' : (themeState ?? 'dark')
+  const hasLinks = Array.isArray(links) && links.length > 0
+  const hasBreadcrumbs = breadcrumbs.length > 0
+
+  // If breadcrumbs bar is not enabled and there are no breadcrumbs to show, render nothing.
+  if (!enableBreadcrumbsBar && !hasBreadcrumbs) {
+    return null
+  }
 
   return (
-    <ChangeHeaderTheme theme={useTheme}>
-      <div
-        className={[classes.wrapper, !hasBackground() && classes.hasBackground]
-          .filter(Boolean)
-          .join(' ')}
-        {...(useTheme ? { 'data-theme': useTheme } : {})}
-      >
-        <Gutter>
-          {enableBreadcrumbsBar ? (
-            <>
-              <div className={classes.container}>
-                <div>{breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}</div>
+    <nav
+      aria-label="Breadcrumbs and page navigation"
+      className="relative z-10 border-b-4 border-ink bg-paper py-3 text-ink"
+    >
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        {hasBreadcrumbs && (
+          <div className="flex flex-wrap items-center gap-2">
+            {breadcrumbs.map((item, index) => {
+              const isLast = index === breadcrumbs.length - 1
+              const label = typeof item.label === 'string' ? item.label : String(item.label || '')
 
-                <div className={classes.links}>
-                  {Array.isArray(links) &&
-                    links.map((linkItem, i) => {
-                      const link = 'link' in linkItem ? linkItem.link : linkItem
-                      const newTab = link?.newTab
+              return (
+                <React.Fragment key={index}>
+                  {item.url && !isLast ? (
+                    <Link
+                      href={item.url}
+                      className="inline-flex items-center border-2 border-ink bg-canvas px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-nb-sm transition-colors hover:bg-nb-yellow"
+                    >
+                      {label}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center border-2 border-ink bg-nb-yellow px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-nb-sm">
+                      {label}
+                    </span>
+                  )}
+                  {!isLast && <span className="font-mono text-xs font-black text-ink select-none">/</span>}
+                </React.Fragment>
+              )
+            })}
+          </div>
+        )}
 
-                      return (
-                        <CMSLink
-                          className={classes.link}
-                          key={i}
-                          {...link}
-                          appearance={'text'}
-                          buttonProps={{
-                            icon: newTab ? 'arrow' : undefined,
-                            labelStyle: 'regular',
-                          }}
-                        />
-                      )
-                    })}
-                </div>
-              </div>
-
-              <div className={classes.containerMobile}>
-                <details className={classes.dropdown}>
-                  <summary>
-                    {breadcrumbsProps?.[breadcrumbsProps.length - 1].label}{' '}
-                    <ChevronIcon className={classes.icon} />{' '}
-                  </summary>
-                  <div className={classes.dropdownContent}>
-                    {Array.isArray(links) &&
-                      links.map((linkItem, i) => {
-                        const link = 'link' in linkItem ? linkItem.link : linkItem
-                        const newTab = link?.newTab
-
-                        return (
-                          <CMSLink
-                            className={classes.link}
-                            key={i}
-                            {...link}
-                            appearance={'text'}
-                            buttonProps={{
-                              icon: newTab ? 'arrow' : undefined,
-                              labelStyle: 'regular',
-                            }}
-                          />
-                        )
-                      })}
-                  </div>
-                </details>
-              </div>
-            </>
-          ) : (
-            <div className={classes.emptyBar} />
-          )}
-        </Gutter>
+        {hasLinks && (
+          <div className="flex flex-wrap items-center gap-2">
+            {links.map((linkItem, i) => (
+              <HeroLinkButton key={i} link={linkItem} variant="outline" size="sm" />
+            ))}
+          </div>
+        )}
       </div>
-    </ChangeHeaderTheme>
+    </nav>
   )
 }
 

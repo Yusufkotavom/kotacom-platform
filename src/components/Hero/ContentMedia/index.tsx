@@ -2,74 +2,80 @@
 
 import type { BlocksProp } from '@components/RenderBlocks/index'
 import type { Page } from '@root/payload-types'
-
-import { BackgroundGrid } from '@components/BackgroundGrid/index'
-import { BlockWrapper } from '@components/BlockWrapper/index'
-import { CMSLink } from '@components/CMSLink/index'
-import { Gutter } from '@components/Gutter/index'
-import { useGetHeroPadding } from '@components/Hero/useGetHeroPadding'
+import { Section } from '@components/nb/Section'
 import { Media } from '@components/Media/index'
 import { RichText } from '@components/RichText/index'
 import React from 'react'
-
-import classes from './index.module.scss'
+import { HeroEyebrow, HeroLinkButton } from '../shared'
 
 export const ContentMediaHero: React.FC<
   {
     breadcrumbs?: Page['breadcrumbs']
     firstContentBlock?: BlocksProp
+    pageTitle?: string
   } & Pick<Page['hero'], 'description' | 'links' | 'media' | 'richText' | 'theme'>
-> = ({ description, firstContentBlock, links, media, richText, theme }) => {
-  const padding = useGetHeroPadding(theme, firstContentBlock)
+> = ({ description, links, media, pageTitle, richText, theme }) => {
+  const hasDescription = Boolean(description && description.root?.children?.length > 0)
+  const hasRichText = Boolean(richText && richText.root?.children?.length > 0)
+  const hasMedia = typeof media === 'object' && media !== null
+  const isDark = theme === 'dark'
 
   return (
-    <BlockWrapper hero padding={padding} settings={{ theme }}>
-      <BackgroundGrid zIndex={0} />
-      <Gutter>
-        <div className={[classes.wrapper, 'grid'].filter(Boolean).join(' ')}>
-          <div
-            className={[classes.sidebar, `cols-4`, 'cols-m-8 start-1'].filter(Boolean).join(' ')}
-          >
-            <RichText className={[classes.richText].filter(Boolean).join(' ')} content={richText} />
+    <Section bg={isDark ? 'ink' : 'canvas'} bleed className="overflow-hidden">
+      <div className="mx-auto grid max-w-7xl lg:grid-cols-2">
+        {/* Left column: Content */}
+        <div className="flex flex-col justify-center px-4 py-12 sm:px-6 lg:py-20 lg:pr-12">
+          <HeroEyebrow dotColor="bg-nb-red">Digital Studio</HeroEyebrow>
 
-            <div className={[classes.linksWrapper].filter(Boolean).join(' ')}>
-              <RichText
-                className={[classes.description].filter(Boolean).join(' ')}
-                content={description}
-              />
+          {pageTitle && (
+            <h1 className="mt-6 text-4xl uppercase leading-[0.9] tracking-tighter sm:text-5xl lg:text-6xl font-black">
+              {pageTitle}
+            </h1>
+          )}
 
-              {Array.isArray(links) &&
-                links.map(({ link }, i) => {
-                  return (
-                    <CMSLink
-                      key={i}
-                      {...link}
-                      buttonProps={{
-                        hideHorizontalBorders: true,
-                      }}
-                      className={[classes.link, 'cols-12 start-1'].filter(Boolean).join(' ')}
-                    />
-                  )
-                })}
+          {hasRichText && (
+            <div className="mt-6 text-lg font-medium leading-relaxed sm:text-xl">
+              <RichText content={richText} />
             </div>
-          </div>
-          {typeof media === 'object' && media !== null && (
-            <div
-              className={[classes.mediaWrapper, `start-7`, `cols-10`, 'cols-m-8 start-m-1']
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <div className={classes.media}>
-                <Media
-                  resource={media}
-                  sizes={`100vw, (max-width: 1920px) 75vw, (max-width: 1024px) 100vw`}
+          )}
+
+          {hasDescription && (
+            <div className="mt-4 max-w-xl text-base font-medium leading-relaxed opacity-90">
+              <RichText content={description} />
+            </div>
+          )}
+
+          {Array.isArray(links) && links.length > 0 && (
+            <div className="mt-8 flex flex-wrap gap-4">
+              {links.map((linkItem, i) => (
+                <HeroLinkButton
+                  key={i}
+                  link={linkItem}
+                  variant={i === 0 ? 'primary' : 'outline'}
+                  size="md"
                 />
-              </div>
+              ))}
             </div>
           )}
         </div>
-        <div className={classes.defaultHero}></div>
-      </Gutter>
-    </BlockWrapper>
+
+        {/* Right column: Media panel */}
+        <div className="relative flex min-h-[320px] items-center justify-center border-t-4 border-ink bg-paper p-6 sm:p-10 lg:border-l-4 lg:border-t-0">
+          <span className="absolute inset-0 opacity-10 dots" />
+
+          {hasMedia ? (
+            <div className="relative z-10 w-full overflow-hidden border-4 border-ink bg-canvas shadow-nb-lg">
+              <Media resource={media} />
+            </div>
+          ) : (
+            <div className="relative z-10 flex h-64 w-64 items-center justify-center">
+              <span className="block h-36 w-36 rounded-full border-4 border-ink bg-nb-yellow shadow-nb" />
+              <span className="-ml-10 block h-28 w-28 rotate-45 border-4 border-ink bg-nb-blue shadow-nb" />
+              <span className="tri -ml-8 block h-24 w-24 border-4 border-ink bg-nb-red shadow-nb" />
+            </div>
+          )}
+        </div>
+      </div>
+    </Section>
   )
 }
