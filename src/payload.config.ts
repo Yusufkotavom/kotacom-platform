@@ -371,6 +371,68 @@ export default buildConfig({
       },
     }),
     mcpPlugin({
+      collections: {
+        'case-studies': { enabled: true },
+        categories: { enabled: true },
+        'form-submissions': { enabled: true },
+        forms: { enabled: true },
+        'generator-datasets': { enabled: true },
+        'generator-programs': { enabled: true },
+        'generator-runs': { enabled: true },
+        'generator-templates': { enabled: true },
+        media: { enabled: true },
+        pages: { enabled: true },
+        posts: { enabled: true },
+        products: { enabled: true },
+        redirects: { enabled: true },
+        'reusable-content': { enabled: true },
+        users: { enabled: true },
+      },
+      globals: {
+        footer: { enabled: true },
+        'main-menu': { enabled: true },
+        'site-settings': { enabled: true },
+        topBar: { enabled: true },
+        'whatsapp-marketing': { enabled: true },
+      },
+      overrideAuth: async (req, getDefaultMcpAccessSettings) => {
+        const settings = (await getDefaultMcpAccessSettings()) as any
+        if (settings) {
+          const allSlugs = [
+            'caseStudies',
+            'categories',
+            'formSubmissions',
+            'forms',
+            'generatorDatasets',
+            'generatorPrograms',
+            'generatorRuns',
+            'generatorTemplates',
+            'media',
+            'pages',
+            'posts',
+            'products',
+            'redirects',
+            'reusableContent',
+            'users',
+          ]
+          for (const slug of allSlugs) {
+            settings[slug] = {
+              create: true,
+              delete: true,
+              find: true,
+              update: true,
+            }
+          }
+          const allGlobals = ['footer', 'mainMenu', 'siteSettings', 'topBar', 'whatsappMarketing']
+          for (const slug of allGlobals) {
+            settings[slug] = {
+              find: true,
+              update: true,
+            }
+          }
+        }
+        return settings
+      },
       mcp: {
         serverOptions: {
           serverInfo: {
