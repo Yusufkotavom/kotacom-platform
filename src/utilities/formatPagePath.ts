@@ -26,6 +26,9 @@ export const formatPagePath = (
         // category slug is renamed; /posts/<category>/<slug> also still works.
         prefix = '/posts'
         break
+      case 'generator-templates':
+        prefix = '/generator-preview'
+        break
       default:
         prefix = `/${collection}`
     }

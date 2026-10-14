@@ -1,12 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useDocumentInfo, useField } from '@payloadcms/ui'
+import { useDocumentInfo } from '@payloadcms/ui'
 
 export const RunProgramButton: React.FC = () => {
   const { id } = useDocumentInfo()
-  const { value: writeModeVal } = useField<string>({ path: 'writeMode' })
-  const { value: aiModeVal } = useField<string>({ path: 'aiMode' })
 
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
@@ -20,10 +18,13 @@ export const RunProgramButton: React.FC = () => {
     )
   }
 
-  const handleRun = async (overrideWriteMode?: 'create' | 'overwrite') => {
-    const targetWriteMode = overrideWriteMode || (writeModeVal as 'create' | 'overwrite') || 'overwrite'
-    const confirmMsg =
-      targetWriteMode === 'overwrite'
+  // 1. Eksekusi Generator (Full / Overwrite / Skip)
+  const handleRun = async (opts: { writeMode: 'create' | 'overwrite'; maxRows?: number; isSample?: boolean }) => {
+    const isSample = opts.isSample ?? false
+    const targetWriteMode = opts.writeMode
+    const confirmMsg = isSample
+      ? 'Jalankan 1 sampel baris pertama untuk uji coba? Dokumen sampel akan dibuat/diupdate.'
+      : targetWriteMode === 'overwrite'
         ? 'PERINGATAN: Generator akan menimpa/overwrite dokumen yang sudah ada dengan konten/template terbaru. Lanjutkan?'
         : 'Generator akan dijalankan dalam mode create (dokumen yang sudah ada akan di-skip). Lanjutkan?'
 
@@ -39,8 +40,9 @@ export const RunProgramButton: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           programId: id,
-          mode: aiModeVal || 'generate',
+          mode: 'generate', // Selalu 'generate' agar bukan sekadar dry-run
           writeMode: targetWriteMode,
+          maxRows: opts.maxRows,
         }),
       })
 
@@ -50,11 +52,51 @@ export const RunProgramButton: React.FC = () => {
       }
 
       const total = data.totals || {}
+      const sampleReport = Array.isArray(data.report) && data.report.length > 0 ? data.report[0] : null
+      const sampleLink = sampleReport?.slug ? ` (Slug: /${sampleReport.slug})` : ''
+
       setResult(
-        `Sukses! Selesai dalam ${(data.durationMs / 1000).toFixed(1)}s. Total: ${total.rows ?? 0} baris (Dibuat: ${total.created ?? 0}, Diupdate: ${total.updated ?? 0}, Dilewati: ${total.skipped ?? 0}, Error: ${total.blocked ?? 0}).`
+        `Sukses! Selesai dalam ${(data.durationMs / 1000).toFixed(1)}s. Total: ${total.rows ?? 0} baris (Dibuat: ${total.created ?? 0}, Diupdate: ${total.updated ?? 0}, Dilewati: ${total.skipped ?? 0}, Error: ${total.blocked ?? 0})${sampleLink}.`
       )
     } catch (err: any) {
       setError(err?.message || 'Gagal menjalankan generator')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 2. Hapus Semua Dokumen Hasil Generator (Purge)
+  const handlePurge = async () => {
+    const input = window.prompt(
+      'BAHAYA: Tindakan ini akan MENGHAPUS SEMUA dokumen (halaman/post) yang dihasilkan oleh generator ini.\n\nKetik "HAPUS" untuk konfirmasi:'
+    )
+    if (input !== 'HAPUS') {
+      if (input !== null) alert('Konfirmasi tidak cocok. Pembatalan dilakukan.')
+      return
+    }
+
+    setLoading(true)
+    setResult(null)
+    setError(null)
+
+    try {
+      const res = await fetch('/api/generator/purge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          programId: id,
+          confirm: true,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+
+      setResult(`Sukses! Berhasil menghapus ${data.deletedCount ?? 0} dokumen hasil generator ini.`)
+    } catch (err: any) {
+      setError(err?.message || 'Gagal menghapus dokumen generator')
     } finally {
       setLoading(false)
     }
@@ -66,14 +108,37 @@ export const RunProgramButton: React.FC = () => {
         <span>🚀 Actions Generator</span>
       </div>
       <p style={{ fontSize: '12px', color: '#555', marginBottom: '12px', lineHeight: '1.4' }}>
-        Eksekusi generator untuk memproses baris dataset sesuai template. Dokumen yang dihasilkan akan otomatis diupdate bila memilih <strong>Overwrite</strong>.
+        Kelola eksekusi konten, uji coba sampel, atau bersihkan hasil generator program ini.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {/* Tombol Preview 1 Sample */}
         <button
           type="button"
           disabled={loading}
-          onClick={() => handleRun('overwrite')}
+          onClick={() => handleRun({ writeMode: 'overwrite', maxRows: 1, isSample: true })}
+          style={{
+            padding: '8px 12px',
+            backgroundColor: '#F0C020',
+            color: '#121212',
+            border: '2px solid #121212',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            fontSize: '11px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            boxShadow: '2px 2px 0px #121212',
+            opacity: loading ? 0.6 : 1,
+            textAlign: 'center',
+          }}
+        >
+          🔍 Preview / Run 1 Sample Saja
+        </button>
+
+        {/* Tombol Full Overwrite */}
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => handleRun({ writeMode: 'overwrite' })}
           style={{
             padding: '10px 14px',
             backgroundColor: '#D02020',
@@ -88,15 +153,16 @@ export const RunProgramButton: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          {loading ? 'Sedang Memproses...' : '⚡ Run & Overwrite (Update Konten)'}
+          {loading ? 'Sedang Memproses...' : '⚡ Run & Overwrite Semua Baris'}
         </button>
 
+        {/* Tombol Run Create Only */}
         <button
           type="button"
           disabled={loading}
-          onClick={() => handleRun('create')}
+          onClick={() => handleRun({ writeMode: 'create' })}
           style={{
-            padding: '8px 14px',
+            padding: '8px 12px',
             backgroundColor: '#1040C0',
             color: '#fff',
             border: '2px solid #121212',
@@ -109,13 +175,37 @@ export const RunProgramButton: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          {loading ? 'Sedang Memproses...' : '➕ Run (Skip Dokumen yang Ada)'}
+          {loading ? 'Sedang Memproses...' : '➕ Run (Skip Yang Sudah Ada)'}
+        </button>
+
+        <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '8px 0' }} />
+
+        {/* Tombol Delete Semua Hasil */}
+        <button
+          type="button"
+          disabled={loading}
+          onClick={handlePurge}
+          style={{
+            padding: '8px 12px',
+            backgroundColor: '#fff',
+            color: '#D02020',
+            border: '2px solid #D02020',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            fontSize: '11px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            boxShadow: '2px 2px 0px #D02020',
+            opacity: loading ? 0.6 : 1,
+            textAlign: 'center',
+          }}
+        >
+          🗑️ Hapus Semua Hasil Dokumen
         </button>
       </div>
 
       {loading && (
         <div style={{ marginTop: '12px', fontSize: '12px', color: '#D02020', fontWeight: 'bold' }}>
-          ⏳ Memproses generator... Mohon tunggu, AI sedang menyusun dokumen.
+          ⏳ Sedang memproses... Mohon tunggu sampai selesai.
         </div>
       )}
 

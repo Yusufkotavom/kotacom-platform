@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAdmin } from '@root/access/isAdmin'
+import { formatPreviewURL } from '@root/utilities/formatPreviewURL'
 import { themeField } from '@root/fields/blockFields'
 
 /**
@@ -23,6 +24,10 @@ export const GeneratorTemplates: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'entityType', 'routeBase', 'updatedAt'],
     group: 'Generator',
+    livePreview: {
+      url: ({ data }) => formatPreviewURL('generator-templates', { ...data, slug: data.id || 'preview' }),
+    },
+    preview: (doc) => formatPreviewURL('generator-templates', { ...doc, slug: doc.id || 'preview' }),
     useAsTitle: 'name',
   },
   fields: [

@@ -31,6 +31,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { default as default_eada017e0539cbd9f5628d9b8dcfd414 } from '@root/components/admin/RunProgramButton'
+import { default as default_af8015bd1b78cec1ddca9482d6b592bd } from '@root/components/admin/ReportFieldComponent'
 import { default as default_7855b44454994335ecfbd19f80d2bb90 } from '@root/globals/CustomRowLabelNavItems'
 import { default as default_7b4b356d4f495796f5ea32368107862c } from '@root/globals/CustomRowLabelTabs'
 import { BlogMarkdownField as BlogMarkdownField_a0e4da4b38919785352cf36efa721675 } from '@root/blocks/BlogMarkdown/Field'
@@ -76,6 +77,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@root/components/admin/RunProgramButton#default": default_eada017e0539cbd9f5628d9b8dcfd414,
+  "@root/components/admin/ReportFieldComponent#default": default_af8015bd1b78cec1ddca9482d6b592bd,
   "@root/globals/CustomRowLabelNavItems#default": default_7855b44454994335ecfbd19f80d2bb90,
   "@root/globals/CustomRowLabelTabs#default": default_7b4b356d4f495796f5ea32368107862c,
   "@root/blocks/BlogMarkdown/Field#BlogMarkdownField": BlogMarkdownField_a0e4da4b38919785352cf36efa721675,

@@ -65,7 +65,13 @@ export const GeneratorRuns: CollectionConfig = {
     {
       name: 'report',
       type: 'json',
-      admin: { description: 'Laporan per-baris (QA + aksi + id dokumen).', readOnly: true },
+      admin: {
+        description: 'Laporan per-baris (QA + aksi + id dokumen).',
+        readOnly: true,
+        components: {
+          Field: '@root/components/admin/ReportFieldComponent',
+        },
+      },
       label: 'Report',
     },
     { name: 'notes', type: 'textarea', admin: { readOnly: true }, label: 'Notes' },
