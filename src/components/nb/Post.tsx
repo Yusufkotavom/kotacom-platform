@@ -1,4 +1,5 @@
 import { RichText } from '@components/RichText/index'
+import { BauhausBlocks } from './blocks'
 import { LinkButton } from './Button'
 import { Pill } from './Pill'
 import { Section } from './Section'
@@ -40,9 +41,9 @@ export function BauhausPost({ post }: { post: any }) {
 
   return (
     <>
-      <Section bg="canvas">
-        <article className="mx-auto max-w-3xl">
-          <div className="mb-5 flex flex-wrap items-center gap-3">
+      <Section bg="canvas" className="border-b-4 border-ink">
+        <article className="mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="mb-6 flex flex-wrap items-center gap-3">
             {cat?.name ? <Pill tone="red">{cat.name}</Pill> : null}
             {date ? (
               <span className="font-mono text-xs font-bold uppercase tracking-widest">{date}</span>
@@ -53,11 +54,11 @@ export function BauhausPost({ post }: { post: any }) {
               </span>
             ) : null}
           </div>
-          <h1 className="text-4xl uppercase leading-[0.95] tracking-tighter sm:text-5xl lg:text-6xl">
+          <h1 className="text-3xl font-black uppercase leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
             {post?.title}
           </h1>
           {post?.excerpt ? (
-            <div className="mt-6 text-lg">
+            <div className="mt-8 border-l-4 border-nb-yellow bg-paper p-5 text-base font-medium text-ink/90 shadow-nb-sm sm:text-lg">
               <RichText content={post.excerpt} />
             </div>
           ) : null}
@@ -65,8 +66,8 @@ export function BauhausPost({ post }: { post: any }) {
       </Section>
 
       {image?.url ? (
-        <Section bg="canvas" compact>
-          <div className="mx-auto max-w-4xl">
+        <Section bg="canvas" compact className="border-b-4 border-ink">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image.url}
@@ -77,30 +78,36 @@ export function BauhausPost({ post }: { post: any }) {
         </Section>
       ) : null}
 
-      <Section bg="paper">
-        <div className="mx-auto max-w-3xl">
-          <RichText content={post?.content} />
-        </div>
-      </Section>
+      {Array.isArray(post?.content) ? (
+        <BauhausBlocks blocks={post.content} />
+      ) : post?.content ? (
+        <Section bg="paper">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+            <RichText content={post.content} />
+          </div>
+        </Section>
+      ) : null}
 
       {related.length > 0 ? (
         <Section bg="canvas">
-          <h2 className="mb-8 text-3xl uppercase tracking-tighter">Artikel lain</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((r: any, i: number) => (
-              <a
-                key={r.id || i}
-                href={`/posts/${r.slug}`}
-                className="block border-4 border-ink bg-paper p-5 shadow-nb press"
-              >
-                <span className="text-lg font-black uppercase leading-tight tracking-tight">
-                  {r.title || r.slug}
-                </span>
-                <span className="mt-3 block font-mono text-xs font-bold uppercase tracking-widest">
-                  Baca artikel &rarr;
-                </span>
-              </a>
-            ))}
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+            <h2 className="mb-8 text-3xl uppercase tracking-tighter">Artikel lain</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((r: any, i: number) => (
+                <a
+                  key={r.id || i}
+                  href={`/posts/${r.slug}`}
+                  className="block border-4 border-ink bg-paper p-5 shadow-nb press"
+                >
+                  <span className="text-lg font-black uppercase leading-tight tracking-tight">
+                    {r.title || r.slug}
+                  </span>
+                  <span className="mt-3 block font-mono text-xs font-bold uppercase tracking-widest">
+                    Baca artikel &rarr;
+                  </span>
+                </a>
+              ))}
+            </div>
           </div>
         </Section>
       ) : null}

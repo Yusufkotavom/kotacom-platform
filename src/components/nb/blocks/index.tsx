@@ -373,11 +373,11 @@ function findLinks(fields: any): AnyLink[] {
  * never rendered on the front-end.
  */
 function AiContentBlock({ fields, id }: { fields: any; id?: string }) {
-  const content = fields?.generatedText || fields?.content
+  const content = fields?.generatedText || fields?.richText || fields?.content
   if (!content) return null
   return (
-    <Section bg="canvas" id={id}>
-      <div className="payload-richtext mx-auto max-w-3xl">
+    <Section bg="canvas" id={id} className="py-8 sm:py-12">
+      <div className="payload-richtext mx-auto max-w-4xl px-4 sm:px-6">
         <RichText content={content} />
       </div>
     </Section>
@@ -939,6 +939,7 @@ const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   form: FormDisplayBlock,
   content: ContentBlock,
   aiContent: AiContentBlock,
+  blogContent: AiContentBlock,
   cardGrid: CardGridBlock,
   steps: StepsBlock,
   mediaBlock: MediaBlock,
@@ -963,6 +964,7 @@ const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   code: CodeDisplayBlock,
   exampleTabs: ExampleTabsBlock,
   whatsappCta: WhatsAppCtaBlock,
+  relatedPosts: () => null,
 }
 
 function fieldsOf(block: any): any {

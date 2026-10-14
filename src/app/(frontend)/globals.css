@@ -179,9 +179,9 @@
   }
   .payload-richtext p {
     font-weight: 500;
-    line-height: 1.75;
-    margin-bottom: 1.1em;
-    max-width: 70ch;
+    line-height: 1.8;
+    margin-bottom: 1.4em;
+    max-width: 72ch;
   }
   .payload-richtext a {
     color: var(--color-nb-red);
@@ -194,9 +194,9 @@
   }
   .payload-richtext ul,
   .payload-richtext ol {
-    margin: 0 0 1.2em;
+    margin: 0.5em 0 1.6em;
     padding-left: 0;
-    max-width: 70ch;
+    max-width: 72ch;
   }
   .payload-richtext ul { list-style: none; }
   .payload-richtext ul li {

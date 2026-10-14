@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Archive } from '@components/Archive'
-import { Post } from '@components/Post/index'
+import { BauhausPost } from '@components/nb/Post'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { fetchArchive, fetchArchives, fetchPostBySlug, fetchPosts } from '@data'
 import { buildMetadata } from '@root/seo/metadata'
@@ -97,7 +97,7 @@ const PostsSegment = async ({
           }),
         ]}
       />
-      <Post {...post} />
+      <BauhausPost post={post} />
     </React.Fragment>
   )
 }
