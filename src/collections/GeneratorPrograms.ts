@@ -147,6 +147,16 @@ export const GeneratorPrograms: CollectionConfig = {
       label: 'Exclude Row Keys',
     },
     {
+      name: 'runActions',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '@root/components/admin/RunProgramButton',
+        },
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       admin: { position: 'sidebar', readOnly: true },

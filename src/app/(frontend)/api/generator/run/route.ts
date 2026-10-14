@@ -54,11 +54,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return json({ error: "`mode` harus salah satu: 'dry' | 'generate' | 'off'." }, 400)
   }
 
+  const writeMode = body.writeMode
+  if (writeMode !== undefined && !['create', 'overwrite'].includes(String(writeMode))) {
+    return json({ error: "`writeMode` harus salah satu: 'create' | 'overwrite'." }, 400)
+  }
+
   try {
     const result = await runProgram(payload, {
       maxRows: typeof body.maxRows === 'number' ? body.maxRows : undefined,
       mode: mode as 'dry' | 'generate' | 'off' | undefined,
       programId: programId as number | string,
+      writeMode: writeMode as 'create' | 'overwrite' | undefined,
     })
     return json({ ok: true, ...result })
   } catch (err) {

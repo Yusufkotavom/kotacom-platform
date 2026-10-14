@@ -7,6 +7,7 @@ import { buildDraft } from './render'
 import { enrichAiBlocks } from './enrich'
 import { assessDraft } from './qa'
 import { buildTokens } from './tokens'
+import { findDuplicate } from './dedupe'
 import type { ContentPlan } from './blocks'
 import type {
   EntityType,
@@ -24,6 +25,8 @@ export type RunOptions = {
   /** Hard cap on rows processed in this call. */
   maxRows?: number
   programId: number | string
+  /** Override program writeMode ('create' = skip existing, 'overwrite' = update existing). */
+  writeMode?: 'create' | 'overwrite'
 }
 
 export type RowReport = {
@@ -232,7 +235,7 @@ export const runProgram = async (
 
   const entityType: EntityType = program.entityType
   const mode = options.mode ?? program.aiMode ?? 'off'
-  const writeMode = program.writeMode ?? 'overwrite'
+  const writeMode = options.writeMode ?? program.writeMode ?? 'overwrite'
   const maxRows = options.maxRows ?? Number(programDoc.maxRows ?? 0)
   const exclude = new Set<string>((programDoc.excludeRowKeys as string[]) ?? [])
 
@@ -316,14 +319,22 @@ export const runProgram = async (
     if (mode !== 'generate' || qa.severity === 'blocked') return entry
 
     // 6) Write.
-    const duplicate = existing.find((doc) => doc.slug === draft.slug)
+    const dupMatch = findDuplicate({
+      existing,
+      keywordKey: draft.keywordKey,
+      programId: draft.generator.programId,
+      rowKey: draft.rowKey,
+      slug: draft.slug,
+    })
+    const targetDoc = dupMatch?.existing
+
     try {
       const data = toPayloadData(draft)
-      if (duplicate && writeMode === 'overwrite') {
-        await payload.update({ collection, data, id: duplicate.id, overrideAccess: true })
+      if (targetDoc && writeMode === 'overwrite') {
+        await payload.update({ collection, data, id: targetDoc.id, overrideAccess: true })
         entry.action = 'updated'
-        entry.docId = duplicate.id
-      } else if (duplicate && writeMode === 'create') {
+        entry.docId = targetDoc.id
+      } else if (targetDoc && writeMode === 'create') {
         entry.action = 'skipped'
       } else {
         const created = (await payload.create({
