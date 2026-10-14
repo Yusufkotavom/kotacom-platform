@@ -16,10 +16,10 @@ export const Users: CollectionConfig = {
   },
   auth: {
     cookies: {
-      domain: process.env.COOKIE_DOMAIN,
+      domain: process.env.COOKIE_DOMAIN || undefined,
       sameSite:
         process.env.NODE_ENV === 'production' && !process.env.DISABLE_SECURE_COOKIE
-          ? 'None'
+          ? 'Lax'
           : undefined,
       secure:
         process.env.NODE_ENV === 'production' && !process.env.DISABLE_SECURE_COOKIE

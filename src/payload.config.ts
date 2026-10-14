@@ -152,7 +152,18 @@ export default buildConfig({
     GeneratorPrograms,
     GeneratorRuns,
   ],
-  cors: [process.env.PAYLOAD_PUBLIC_APP_URL || ''].filter(Boolean),
+  cors: [
+    process.env.PAYLOAD_PUBLIC_APP_URL || '',
+    process.env.NEXT_PUBLIC_SITE_URL || '',
+    'https://staging.kotacom.id',
+    'https://s.devk.my.id',
+  ].filter(Boolean),
+  csrf: [
+    process.env.PAYLOAD_PUBLIC_APP_URL || '',
+    process.env.NEXT_PUBLIC_SITE_URL || '',
+    'https://staging.kotacom.id',
+    'https://s.devk.my.id',
+  ].filter(Boolean),
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
