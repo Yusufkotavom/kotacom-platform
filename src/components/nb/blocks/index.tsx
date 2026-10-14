@@ -682,14 +682,22 @@ function ComparisonTableBlock({ fields }: { fields: any; id?: string }) {
 }
 
 function CodeDisplayBlock({ fields, id }: { fields: any; id?: string }) {
-  const { code, heading, richText } = fields || {}
-  const rawCode = typeof code === 'string' ? code : ''
+  const { code, heading, richText, codeTabs } = fields || {}
+  const rawCode =
+    typeof code === 'string'
+      ? code
+      : Array.isArray(codeTabs) && codeTabs.length > 0 && typeof codeTabs[0]?.code === 'string'
+      ? codeTabs[0].code
+      : ''
+  const displayHeading =
+    heading || (Array.isArray(codeTabs) && codeTabs[0]?.label) || ''
+
   return (
     <Section bg="canvas" id={id}>
       <div className="mx-auto max-w-4xl border-4 border-ink bg-nb-ink text-white p-6 shadow-nb-lg">
-        {heading ? (
+        {displayHeading ? (
           <div className="mb-4 border-b-2 border-white/20 pb-2 font-mono text-sm uppercase tracking-wider text-nb-yellow">
-            {heading}
+            {displayHeading}
           </div>
         ) : null}
         {richText ? (
@@ -707,8 +715,231 @@ function CodeDisplayBlock({ fields, id }: { fields: any; id?: string }) {
   )
 }
 
+function ContentGridBlock({ fields, id }: { fields: any; id?: string }) {
+  const { content, cells, links } = fields || {}
+  const cellList = Array.isArray(cells) ? cells : []
+  const hasLinks = Array.isArray(links) && links.length > 0
+  const shapes = ['circle', 'square', 'triangle', 'diamond'] as const
+  const tones = ['yellow', 'blue', 'red', 'yellow'] as const
+
+  return (
+    <Section bg="canvas" id={id}>
+      {content ? (
+        <div className="mb-8 max-w-3xl">
+          <RichText content={content} />
+        </div>
+      ) : null}
+      {hasLinks ? (
+        <div className="mb-8 flex flex-wrap gap-3">
+          {links.map((l: any, i: number) => (
+            <LinkButton key={i} href={hrefOf(l?.link)} variant={i === 0 ? 'primary' : 'outline'}>
+              {l?.link?.label || 'Selengkapnya'}
+            </LinkButton>
+          ))}
+        </div>
+      ) : null}
+      {cellList.length > 0 ? (
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {cellList.map((c: any, i: number) => (
+            <Card
+              key={c.id || i}
+              cornerShape={shapes[i % shapes.length]}
+              cornerTone={tones[i % tones.length]}
+              className="p-7"
+            >
+              {c.content ? <RichText content={c.content} /> : null}
+            </Card>
+          ))}
+        </div>
+      ) : null}
+    </Section>
+  )
+}
+
+function ExampleTabsBlock({ fields, id }: { fields: any; id?: string }) {
+  const { content, tabs } = fields || {}
+  const tabList = Array.isArray(tabs) ? tabs : []
+
+  return (
+    <Section bg="canvas" id={id}>
+      {content ? (
+        <div className="mb-8 max-w-3xl">
+          <RichText content={content} />
+        </div>
+      ) : null}
+      {tabList.length > 0 ? (
+        <div className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {tabList.map((t: any, i: number) => {
+              const examples = Array.isArray(t.examples) ? t.examples : []
+              return (
+                <div key={t.id || i} className="border-4 border-ink bg-paper p-6 shadow-nb-lg">
+                  <div className="mb-3 inline-block border-2 border-ink bg-nb-yellow px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-nb-sm">
+                    {t.label || `Tab ${i + 1}`}
+                  </div>
+                  {t.content ? (
+                    <div className="mb-4">
+                      <RichText content={t.content} />
+                    </div>
+                  ) : null}
+                  {examples.map((ex: any, j: number) => {
+                    if (ex.code) {
+                      return (
+                        <pre
+                          key={ex.id || j}
+                          className="mt-3 overflow-x-auto border-2 border-ink bg-nb-ink p-4 font-mono text-xs text-green-400"
+                        >
+                          <code>{ex.code}</code>
+                        </pre>
+                      )
+                    }
+                    if (ex.media) {
+                      return (
+                        <div key={ex.id || j} className="mt-3">
+                          <NewMedia m={ex.media} />
+                        </div>
+                      )
+                    }
+                    return null
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
+    </Section>
+  )
+}
+
+function CaseStudyCardsBlock({ fields, id }: { fields: any; id?: string }) {
+  const { cards } = fields || {}
+  const cardList = Array.isArray(cards) ? cards : []
+  return (
+    <Section bg="canvas" id={id}>
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {cardList.map((c: any, i: number) => {
+          const cs = typeof c.caseStudy === 'object' ? c.caseStudy : null
+          const title = cs?.title || `Studi Kasus ${i + 1}`
+          const excerpt = cs?.excerpt || ''
+          const url = cs?.slug ? `/case-studies/${cs.slug}` : '/case-studies'
+          return (
+            <Card key={c.id || i} cornerShape="square" cornerTone="blue" className="p-7">
+              <h3 className="text-xl uppercase tracking-tight">{title}</h3>
+              {c.richText ? (
+                <div className="mt-3">
+                  <RichText content={c.richText} />
+                </div>
+              ) : excerpt ? (
+                <p className="mt-3 font-medium leading-relaxed">{excerpt}</p>
+              ) : null}
+              <LinkButton href={url} variant="outline" size="sm" className="mt-5">
+                Baca Studi Kasus →
+              </LinkButton>
+            </Card>
+          )
+        })}
+      </div>
+    </Section>
+  )
+}
+
+function CaseStudiesHighlightBlock({ fields, id }: { fields: any; id?: string }) {
+  const { richText, caseStudies } = fields || {}
+  const list = Array.isArray(caseStudies) ? caseStudies : []
+  return (
+    <Section bg="canvas" id={id}>
+      {richText ? (
+        <div className="mb-8 max-w-3xl">
+          <RichText content={richText} />
+        </div>
+      ) : null}
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((cs: any, i: number) => {
+          const item = typeof cs === 'object' ? cs : null
+          const title = item?.title || `Highlight Studi Kasus ${i + 1}`
+          const excerpt = item?.excerpt || ''
+          const url = item?.slug ? `/case-studies/${item.slug}` : '/case-studies'
+          return (
+            <Card key={item?.id || i} cornerShape="triangle" cornerTone="red" className="p-7">
+              <h3 className="text-xl uppercase tracking-tight">{title}</h3>
+              {excerpt ? <p className="mt-3 font-medium leading-relaxed">{excerpt}</p> : null}
+              <LinkButton href={url} variant="primary" size="sm" className="mt-5">
+                Eksplor Proyek →
+              </LinkButton>
+            </Card>
+          )
+        })}
+      </div>
+    </Section>
+  )
+}
+
+function FormDisplayBlock({ fields, id }: { fields: any; id?: string }) {
+  const { richText, form } = fields || {}
+  const formTitle = typeof form === 'object' ? form?.title : 'Formulir Kontak Kotacom'
+  return (
+    <Section bg="canvas" id={id}>
+      <div className="mx-auto max-w-2xl border-4 border-ink bg-paper p-8 shadow-nb-lg">
+        <div className="mb-6 border-b-4 border-ink pb-4">
+          <span className="inline-block border-2 border-ink bg-nb-red px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-white shadow-nb-sm">
+            Interactive Form
+          </span>
+          <h2 className="mt-3 text-2xl font-black uppercase tracking-tight">{formTitle}</h2>
+          {richText ? (
+            <div className="mt-2 text-ink/80">
+              <RichText content={richText} />
+            </div>
+          ) : null}
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            alert('Formulir berhasil disubmit.')
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block font-mono text-xs font-bold uppercase tracking-wider">Nama Lengkap</label>
+            <input
+              type="text"
+              required
+              placeholder="cth. Budi Santoso"
+              className="mt-1 w-full border-2 border-ink bg-canvas px-4 py-3 font-medium shadow-nb-sm focus:outline-none focus:ring-2 focus:ring-nb-yellow"
+            />
+          </div>
+          <div>
+            <label className="block font-mono text-xs font-bold uppercase tracking-wider">Email Bisnis</label>
+            <input
+              type="email"
+              required
+              placeholder="budi@perusahaan.com"
+              className="mt-1 w-full border-2 border-ink bg-canvas px-4 py-3 font-medium shadow-nb-sm focus:outline-none focus:ring-2 focus:ring-nb-yellow"
+            />
+          </div>
+          <div>
+            <label className="block font-mono text-xs font-bold uppercase tracking-wider">Kebutuhan Solusi</label>
+            <textarea
+              rows={3}
+              required
+              placeholder="Ceritakan proyek atau kebutuhan cetak & IT Anda..."
+              className="mt-1 w-full border-2 border-ink bg-canvas px-4 py-3 font-medium shadow-nb-sm focus:outline-none focus:ring-2 focus:ring-nb-yellow"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full border-2 border-ink bg-nb-red py-3 font-black uppercase tracking-wider text-white shadow-nb press hover:bg-nb-red/90"
+          >
+            Kirim Permintaan Konsultasi →
+          </button>
+        </form>
+      </div>
+    </Section>
+  )
+}
+
 const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
-  form: GenericBlock,
+  form: FormDisplayBlock,
   content: ContentBlock,
   aiContent: AiContentBlock,
   cardGrid: CardGridBlock,
@@ -720,19 +951,20 @@ const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   banner: BannerBlock,
   callout: CalloutBlock,
   linkGrid: LinkGridBlock,
-  contentGrid: GenericBlock,
+  contentGrid: ContentGridBlock,
   hoverHighlights: GenericBlock,
   pricing: PricingBlock,
   comparisonTable: ComparisonTableBlock,
   mediaContent: GenericBlock,
   mediaContentAccordion: GenericBlock,
   logoGrid: LogoGridBlock,
-  caseStudyCards: GenericBlock,
-  caseStudiesHighlight: GenericBlock,
+  caseStudyCards: CaseStudyCardsBlock,
+  caseStudiesHighlight: CaseStudiesHighlightBlock,
   stickyHighlights: GenericBlock,
   slider: SliderBlock,
   codeFeature: CodeDisplayBlock,
   code: CodeDisplayBlock,
+  exampleTabs: ExampleTabsBlock,
   whatsappCta: WhatsAppCtaBlock,
 }
 
