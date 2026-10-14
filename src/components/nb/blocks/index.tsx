@@ -892,17 +892,12 @@ function FormDisplayBlock({ fields, id }: { fields: any; id?: string }) {
             </div>
           ) : null}
         </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            alert('Formulir berhasil disubmit.')
-          }}
-          className="space-y-4"
-        >
+        <form action="/api/contact" method="POST" className="space-y-4">
           <div>
             <label className="block font-mono text-xs font-bold uppercase tracking-wider">Nama Lengkap</label>
             <input
               type="text"
+              name="name"
               required
               placeholder="cth. Budi Santoso"
               className="mt-1 w-full border-2 border-ink bg-canvas px-4 py-3 font-medium shadow-nb-sm focus:outline-none focus:ring-2 focus:ring-nb-yellow"
@@ -912,6 +907,7 @@ function FormDisplayBlock({ fields, id }: { fields: any; id?: string }) {
             <label className="block font-mono text-xs font-bold uppercase tracking-wider">Email Bisnis</label>
             <input
               type="email"
+              name="email"
               required
               placeholder="budi@perusahaan.com"
               className="mt-1 w-full border-2 border-ink bg-canvas px-4 py-3 font-medium shadow-nb-sm focus:outline-none focus:ring-2 focus:ring-nb-yellow"
@@ -920,6 +916,7 @@ function FormDisplayBlock({ fields, id }: { fields: any; id?: string }) {
           <div>
             <label className="block font-mono text-xs font-bold uppercase tracking-wider">Kebutuhan Solusi</label>
             <textarea
+              name="message"
               rows={3}
               required
               placeholder="Ceritakan proyek atau kebutuhan cetak & IT Anda..."
