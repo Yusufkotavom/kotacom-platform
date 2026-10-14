@@ -76,6 +76,13 @@ const PostsSegment = async ({
   }
 
   const slug = post.slug || category
+  const authorName =
+    Array.isArray(post.authors) && (post.authors[0] as any)?.name
+      ? (post.authors[0] as any).name
+      : typeof post.guestAuthor === 'string'
+        ? post.guestAuthor
+        : null
+  const categoryName = typeof post.category === 'object' ? post.category?.name : null
 
   return (
     <React.Fragment>
@@ -84,6 +91,9 @@ const PostsSegment = async ({
           breadcrumbSchema([
             { name: 'Beranda', url: '/' },
             { name: 'Artikel', url: '/posts' },
+            ...(categoryName && typeof post.category === 'object' && post.category?.slug
+              ? [{ name: categoryName, url: `/posts/${post.category.slug}` }]
+              : []),
             { name: post.title || slug, url: `/posts/${slug}` },
           ]),
           articleSchema({
@@ -94,6 +104,8 @@ const PostsSegment = async ({
             updatedAt: post.updatedAt,
             excerpt: post.meta?.description || richTextToPlain(post.excerpt),
             image: (post.image || post.meta?.image) as never,
+            authorName,
+            articleSection: categoryName,
           }),
         ]}
       />
@@ -143,6 +155,14 @@ export const generateMetadata = async ({
   const post = await fetchPostBySlug(category)
 
   if (post) {
+    const authorName =
+      Array.isArray(post.authors) && (post.authors[0] as any)?.name
+        ? (post.authors[0] as any).name
+        : typeof post.guestAuthor === 'string'
+          ? post.guestAuthor
+          : 'Kotacom'
+    const categoryName = typeof post.category === 'object' ? post.category?.name : undefined
+
     return buildMetadata({
       kind: 'post',
       path: `/posts/${post.slug || category}`,
@@ -154,6 +174,9 @@ export const generateMetadata = async ({
       featuredImage: post.image,
       ogTypeOverride: 'article',
       publishedTime: post.publishedOn,
+      modifiedTime: post.updatedAt,
+      authorName,
+      section: categoryName,
     })
   }
 

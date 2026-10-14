@@ -210,20 +210,40 @@ export const articleSchema = (post: {
   authors?: unknown
   authorName?: string | null
   url?: string | null
-}): Schema => ({
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: post.title || undefined,
-  description: post.excerpt || undefined,
-  image: mediaUrl(post.image) || undefined,
-  datePublished: post.publishedOn || undefined,
-  dateModified: post.updatedAt || post.publishedOn || undefined,
-  mainEntityOfPage: post.url ? abs(post.url) : post.slug ? `${base}/posts/${post.slug}` : base,
-  author: post.authorName
-    ? { '@type': 'Person', name: post.authorName }
-    : { '@type': 'Organization', name: 'Kotacom' },
-  publisher: { '@id': `${base}/#organization` },
-})
+  wordCount?: number | null
+  keywords?: string[] | null
+  articleSection?: string | null
+}): Schema => {
+  const authorName =
+    post.authorName ||
+    (Array.isArray(post.authors) && (post.authors[0] as any)?.name
+      ? (post.authors[0] as any).name
+      : null)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title || undefined,
+    description: post.excerpt || undefined,
+    image: mediaUrl(post.image) || undefined,
+    datePublished: post.publishedOn || undefined,
+    dateModified: post.updatedAt || post.publishedOn || undefined,
+    mainEntityOfPage: post.url ? abs(post.url) : post.slug ? `${base}/posts/${post.slug}` : base,
+    author: authorName
+      ? {
+          '@type': 'Person',
+          name: authorName,
+        }
+      : { '@type': 'Organization', name: 'Kotacom', url: base },
+    publisher: {
+      '@id': `${base}/#organization`,
+    },
+    inLanguage: 'id-ID',
+    ...(post.articleSection ? { articleSection: post.articleSection } : {}),
+    ...(post.keywords && post.keywords.length > 0 ? { keywords: post.keywords.join(', ') } : {}),
+    ...(post.wordCount ? { wordCount: post.wordCount } : {}),
+  }
+}
 
 export const serviceSchema = (opts: {
   name: string

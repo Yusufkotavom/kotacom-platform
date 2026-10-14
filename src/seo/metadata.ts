@@ -48,6 +48,10 @@ export type BuildMetadataInput = {
   /** OpenGraph type for entity pages: use 'article' for posts/case-studies. */
   ogTypeOverride?: string
   publishedTime?: string | null
+  modifiedTime?: string | null
+  authorName?: string | null
+  section?: string | null
+  tags?: string[]
 }
 
 /**
@@ -91,6 +95,10 @@ export const buildMetadata = (input: BuildMetadataInput): Metadata => {
       url: input.path,
       images: [{ url: image }],
       ...(input.publishedTime ? { publishedTime: input.publishedTime } : {}),
+      ...(input.modifiedTime ? { modifiedTime: input.modifiedTime } : {}),
+      ...(input.authorName ? { authors: [input.authorName] } : {}),
+      ...(input.section ? { section: input.section } : {}),
+      ...(input.tags ? { tags: input.tags } : {}),
     }),
     twitter: { card: 'summary_large_image' },
     ...(input.noindex ? { robots: { index: false, follow: false } } : {}),

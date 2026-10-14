@@ -49,16 +49,26 @@ const PostPage = async ({
     return <PayloadRedirects url={url} />
   }
 
+  const authorName =
+    Array.isArray(blogPost.authors) && (blogPost.authors[0] as any)?.name
+      ? (blogPost.authors[0] as any).name
+      : typeof blogPost.guestAuthor === 'string'
+        ? blogPost.guestAuthor
+        : null
+  const categoryName = typeof blogPost.category === 'object' ? blogPost.category?.name : null
+
   return (
     <React.Fragment>
       <PayloadRedirects disableNotFound url={url} />
       <RefreshRouteOnSave />
-      <BreadcrumbsBar breadcrumbs={[]} hero={{ type: 'default' }} />
       <JsonLd
         schema={[
           breadcrumbSchema([
             { name: 'Beranda', url: '/' },
             { name: 'Artikel', url: '/posts' },
+            ...(categoryName && typeof blogPost.category === 'object' && blogPost.category?.slug
+              ? [{ name: categoryName, url: `/posts/${blogPost.category.slug}` }]
+              : []),
             { name: blogPost.title || slug, url: `/posts/${slug}` },
           ]),
           articleSchema({
@@ -69,6 +79,8 @@ const PostPage = async ({
             updatedAt: blogPost.updatedAt,
             excerpt: blogPost.meta?.description || richTextToPlain(blogPost.excerpt),
             image: (blogPost.image || blogPost.meta?.image) as never,
+            authorName,
+            articleSection: categoryName,
           }),
         ]}
       />
@@ -116,6 +128,14 @@ export async function generateMetadata({
   const { slug, category } = await params
   const post = await getPost(slug, category, draft)
 
+  const authorName =
+    Array.isArray(post?.authors) && (post?.authors[0] as any)?.name
+      ? (post?.authors[0] as any).name
+      : typeof post?.guestAuthor === 'string'
+        ? post.guestAuthor
+        : 'Kotacom'
+  const categoryName = typeof post?.category === 'object' ? post?.category?.name : undefined
+
   return buildMetadata({
     kind: 'post',
     path: `/posts/${slug}`,
@@ -127,5 +147,8 @@ export async function generateMetadata({
     featuredImage: post?.featuredMedia === 'upload' ? post?.image : null,
     ogTypeOverride: 'article',
     publishedTime: post?.publishedOn,
+    modifiedTime: post?.updatedAt,
+    authorName,
+    section: categoryName,
   })
 }

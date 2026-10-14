@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { Calendar, ChevronRight, Clock, Folder, User } from 'lucide-react'
 import { RichText } from '@components/RichText/index'
 import { BauhausBlocks } from './blocks'
 import { LinkButton } from './Button'
@@ -10,6 +12,17 @@ function fmtDate(d?: string) {
     return new Date(d).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
   } catch {
     return null
+  }
+}
+
+function readingTime(content: any): string {
+  try {
+    const text = JSON.stringify(content || '')
+    const words = text.split(/\s+/).length
+    const mins = Math.max(1, Math.round(words / 200))
+    return `${mins} menit baca`
+  } catch {
+    return '3 menit baca'
   }
 }
 
@@ -37,23 +50,62 @@ export function BauhausPost({ post }: { post: any }) {
     : []
   const date = fmtDate(post?.publishedOn)
   const author =
-    Array.isArray(post?.authors) && post.authors[0]?.name ? post.authors[0].name : null
+    Array.isArray(post?.authors) && post.authors[0]?.name
+      ? post.authors[0].name
+      : typeof post?.guestAuthor === 'string'
+        ? post.guestAuthor
+        : 'Kotacom Admin'
+  const estTime = readingTime(post?.content)
 
   return (
     <>
       <Section bg="canvas" className="border-b-4 border-ink">
         <article className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            {cat?.name ? <Pill tone="red">{cat.name}</Pill> : null}
-            {date ? (
-              <span className="font-mono text-xs font-bold uppercase tracking-widest">{date}</span>
+          {/* Breadcrumb visual */}
+          <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider text-ink/70">
+            <Link href="/" className="hover:text-nb-red hover:underline">
+              Beranda
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <Link href="/posts" className="hover:text-nb-red hover:underline">
+              Artikel
+            </Link>
+            {cat?.name && cat?.slug ? (
+              <>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <Link href={`/posts/${cat.slug}`} className="hover:text-nb-red hover:underline">
+                  {cat.name}
+                </Link>
+              </>
             ) : null}
-            {author ? (
-              <span className="font-mono text-xs font-bold uppercase tracking-widest">
-                · {author}
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="truncate max-w-[200px] sm:max-w-xs text-ink">{post?.title}</span>
+          </nav>
+
+          {/* Metadata badges: Category, Calendar, User, Reading Time */}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            {cat?.name ? (
+              <span className="inline-flex items-center gap-1.5 border-2 border-ink bg-nb-red px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-white shadow-nb-sm">
+                <Folder className="h-3.5 w-3.5" />
+                {cat.name}
               </span>
             ) : null}
+            {date ? (
+              <span className="inline-flex items-center gap-1.5 border-2 border-ink bg-paper px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-nb-sm">
+                <Calendar className="h-3.5 w-3.5 text-nb-blue" />
+                <time dateTime={post?.publishedOn}>{date}</time>
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-1.5 border-2 border-ink bg-paper px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-nb-sm">
+              <User className="h-3.5 w-3.5 text-nb-red" />
+              <span>{author}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 border-2 border-ink bg-paper px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-nb-sm">
+              <Clock className="h-3.5 w-3.5 text-nb-yellow" />
+              <span>{estTime}</span>
+            </span>
           </div>
+
           <h1 className="text-3xl font-black uppercase leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
             {post?.title}
           </h1>
