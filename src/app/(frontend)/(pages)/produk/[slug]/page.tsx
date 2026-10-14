@@ -4,7 +4,7 @@ import { buildSafe } from '@root/utilities/buildSafe'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { PayloadRedirects } from '@components/PayloadRedirects/index'
 import { RefreshRouteOnSave } from '@components/RefreshRouterOnSave/index'
-import { fetchProduct, fetchProducts } from '@data'
+import { fetchProduct, fetchProducts, fetchRelatedProducts } from '@data'
 import { buildMetadata } from '@root/seo/metadata'
 import {
   breadcrumbSchema,
@@ -39,6 +39,12 @@ const ProductBySlug = async ({ params }) => {
     return <PayloadRedirects url={url} />
   }
 
+  const related = await fetchRelatedProducts(
+    product.slug || undefined,
+    (product as any).offeringType || undefined,
+    3,
+  )
+
   return (
     <>
       <PayloadRedirects disableNotFound url={url} />
@@ -57,7 +63,7 @@ const ProductBySlug = async ({ params }) => {
           })(),
         ]}
       />
-      <BauhausProduct product={product} />
+      <BauhausProduct product={product} relatedProducts={related} />
     </>
   )
 }

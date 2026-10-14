@@ -469,6 +469,45 @@ export const fetchProducts = async (): Promise<Partial<Product>[]> => {
   return data.docs
 }
 
+export const fetchRelatedProducts = async (
+  currentSlug?: string,
+  offeringType?: string,
+  limit: number = 3,
+): Promise<Partial<Product>[]> => {
+  const payload = await getPayload({ config })
+
+  const andConditions: any[] = [
+    { _status: { equals: 'published' } },
+  ]
+
+  if (currentSlug) {
+    andConditions.push({ slug: { not_equals: currentSlug } })
+  }
+
+  if (offeringType) {
+    andConditions.push({ offeringType: { equals: offeringType } })
+  }
+
+  const data = await payload.find({
+    collection: 'products',
+    depth: 1,
+    limit,
+    select: {
+      slug: true,
+      title: true,
+      featuredImage: true,
+      price: true,
+      shortDescription: true,
+      offeringType: true,
+    },
+    where: {
+      and: andConditions,
+    },
+  })
+
+  return data.docs
+}
+
 export const fetchProduct = async (slug: string): Promise<Product> => {
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayload({ config })
