@@ -7,6 +7,7 @@ import { publishedOnly } from '../access/publishedOnly'
 import { fullTitle } from '../fields/fullTitle'
 import { generatorField } from '../fields/generatorField'
 import { hero } from '../fields/hero'
+import { isGeneratedField, syncIsGenerated } from '../fields/isGenerated'
 import { slugField } from '../fields/slug'
 import { formatPreviewURL } from '../utilities/formatPreviewURL'
 
@@ -20,7 +21,7 @@ export const Pages: CollectionConfig = {
     update: isAdmin,
   },
   admin: {
-    defaultColumns: ['fullTitle', 'slug', 'createdAt', 'updatedAt'],
+    defaultColumns: ['fullTitle', 'slug', 'isGenerated', '_status', 'updatedAt'],
     livePreview: {
       url: ({ data }) => formatPreviewURL('pages', data),
     },
@@ -42,10 +43,10 @@ export const Pages: CollectionConfig = {
     {
       name: 'description',
       type: 'textarea',
-      label: 'Ringkasan halaman',
       admin: {
         description: 'Dipakai sebagai deskripsi meta & ringkasan bila kolom SEO dikosongkan.',
       },
+      label: 'Ringkasan halaman',
     },
     {
       name: 'noindex',
@@ -106,6 +107,7 @@ export const Pages: CollectionConfig = {
     },
     slugField(),
     generatorField,
+    isGeneratedField,
   ],
   hooks: {
     afterChange: [
@@ -135,6 +137,7 @@ export const Pages: CollectionConfig = {
         }
       },
     ],
+    beforeChange: [syncIsGenerated],
   },
   versions: {
     drafts: true,

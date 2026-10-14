@@ -870,6 +870,10 @@ export interface Page {
     lastRunId?: string | null;
     generatedAt?: string | null;
   };
+  /**
+   * Otomatis: dicentang bila dokumen dibuat oleh generator.
+   */
+  isGenerated?: boolean | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -981,6 +985,10 @@ export interface Post {
     lastRunId?: string | null;
     generatedAt?: string | null;
   };
+  /**
+   * Otomatis: dicentang bila dokumen dibuat oleh generator.
+   */
+  isGenerated?: boolean | null;
   publishedOn: string;
   meta?: {
     title?: string | null;
@@ -3182,7 +3190,27 @@ export interface GeneratorDataset {
   name: string;
   notes?: string | null;
   /**
-   * Tiap baris = satu dokumen yang dihasilkan.
+   * Tempel CSV di sini (baris pertama = nama kolom/token). Saat disimpan, kolom otomatis jadi token {{kolom}} dan tiap baris jadi satu dokumen. Pemisah , ; atau tab terdeteksi otomatis. Biarkan kosong untuk mengisi Rows secara manual.
+   */
+  sourceCsv?: string | null;
+  /**
+   * Nama kolom yang dipakai sebagai Row Key (ID stabil untuk deteksi duplikat & overwrite). Kosongkan untuk memakai kolom pertama.
+   */
+  keyColumn?: string | null;
+  /**
+   * Ringkasan hasil parse CSV terakhir (otomatis).
+   */
+  csvReport?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Tiap baris = satu dokumen yang dihasilkan. Terisi otomatis dari Source CSV bila diisi; jika CSV kosong, boleh diisi manual.
    */
   rows?:
     | {
@@ -3381,6 +3409,326 @@ export interface PayloadMcpApiKey {
    * The purpose of the API key.
    */
   description?: string | null;
+  caseStudies?: {
+    /**
+     * Allow clients to find case-studies.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create case-studies.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update case-studies.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete case-studies.
+     */
+    delete?: boolean | null;
+  };
+  categories?: {
+    /**
+     * Allow clients to find categories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create categories.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update categories.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete categories.
+     */
+    delete?: boolean | null;
+  };
+  formSubmissions?: {
+    /**
+     * Allow clients to find form-submissions.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create form-submissions.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update form-submissions.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete form-submissions.
+     */
+    delete?: boolean | null;
+  };
+  forms?: {
+    /**
+     * Allow clients to find forms.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create forms.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update forms.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete forms.
+     */
+    delete?: boolean | null;
+  };
+  generatorDatasets?: {
+    /**
+     * Allow clients to find generator-datasets.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create generator-datasets.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update generator-datasets.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete generator-datasets.
+     */
+    delete?: boolean | null;
+  };
+  generatorPrograms?: {
+    /**
+     * Allow clients to find generator-programs.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create generator-programs.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update generator-programs.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete generator-programs.
+     */
+    delete?: boolean | null;
+  };
+  generatorRuns?: {
+    /**
+     * Allow clients to find generator-runs.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create generator-runs.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update generator-runs.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete generator-runs.
+     */
+    delete?: boolean | null;
+  };
+  generatorTemplates?: {
+    /**
+     * Allow clients to find generator-templates.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create generator-templates.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update generator-templates.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete generator-templates.
+     */
+    delete?: boolean | null;
+  };
+  media?: {
+    /**
+     * Allow clients to find media.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create media.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update media.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete media.
+     */
+    delete?: boolean | null;
+  };
+  pages?: {
+    /**
+     * Allow clients to find pages.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create pages.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update pages.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete pages.
+     */
+    delete?: boolean | null;
+  };
+  posts?: {
+    /**
+     * Allow clients to find posts.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create posts.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update posts.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts.
+     */
+    delete?: boolean | null;
+  };
+  products?: {
+    /**
+     * Allow clients to find products.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create products.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update products.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete products.
+     */
+    delete?: boolean | null;
+  };
+  redirects?: {
+    /**
+     * Allow clients to find redirects.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create redirects.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update redirects.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete redirects.
+     */
+    delete?: boolean | null;
+  };
+  reusableContent?: {
+    /**
+     * Allow clients to find reusable-content.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create reusable-content.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update reusable-content.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete reusable-content.
+     */
+    delete?: boolean | null;
+  };
+  users?: {
+    /**
+     * Allow clients to find users.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create users.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update users.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete users.
+     */
+    delete?: boolean | null;
+  };
+  footer?: {
+    /**
+     * Allow clients to find footer global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update footer global.
+     */
+    update?: boolean | null;
+  };
+  mainMenu?: {
+    /**
+     * Allow clients to find main-menu global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update main-menu global.
+     */
+    update?: boolean | null;
+  };
+  siteSettings?: {
+    /**
+     * Allow clients to find site-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update site-settings global.
+     */
+    update?: boolean | null;
+  };
+  topBar?: {
+    /**
+     * Allow clients to find topBar global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update topBar global.
+     */
+    update?: boolean | null;
+  };
+  whatsappMarketing?: {
+    /**
+     * Allow clients to find whatsapp-marketing global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update whatsapp-marketing global.
+     */
+    update?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -3792,6 +4140,7 @@ export interface PagesSelect<T extends boolean = true> {
         lastRunId?: T;
         generatedAt?: T;
       };
+  isGenerated?: T;
   meta?:
     | T
     | {
@@ -3875,6 +4224,7 @@ export interface PostsSelect<T extends boolean = true> {
         lastRunId?: T;
         generatedAt?: T;
       };
+  isGenerated?: T;
   publishedOn?: T;
   meta?:
     | T
@@ -4003,6 +4353,9 @@ export interface GeneratorTemplatesSelect<T extends boolean = true> {
 export interface GeneratorDatasetsSelect<T extends boolean = true> {
   name?: T;
   notes?: T;
+  sourceCsv?: T;
+  keyColumn?: T;
+  csvReport?: T;
   rows?:
     | T
     | {
@@ -4246,6 +4599,156 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   user?: T;
   label?: T;
   description?: T;
+  caseStudies?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  categories?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  formSubmissions?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  forms?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  generatorDatasets?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  generatorPrograms?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  generatorRuns?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  generatorTemplates?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  media?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  pages?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  posts?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  products?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  redirects?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  reusableContent?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  users?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  footer?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  mainMenu?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  siteSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  topBar?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  whatsappMarketing?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;

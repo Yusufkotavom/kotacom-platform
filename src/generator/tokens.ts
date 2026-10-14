@@ -40,7 +40,18 @@ export const buildTokens = (
   row: GeneratorRow,
 ): Record<string, string> => {
   const primaryKeyword = clean(row.primaryKeyword)
-  const secondaryKeywords = (row.secondaryKeywords ?? []).map(clean).filter(Boolean).join(', ')
+  // `secondaryKeywords` may arrive as a string (CSV column) or an array (JSON
+  // rows). Normalise both to a comma-joined string of trimmed values.
+  const secondaryKeywords = (
+    Array.isArray(row.secondaryKeywords)
+      ? row.secondaryKeywords
+      : typeof row.secondaryKeywords === 'string'
+        ? row.secondaryKeywords.split(',')
+        : []
+  )
+    .map(clean)
+    .filter(Boolean)
+    .join(', ')
   const service = clean(row.service) || primaryKeyword
   const city = clean(row.city)
   const location = city || service || 'target utama'

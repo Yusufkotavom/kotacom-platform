@@ -12,6 +12,22 @@ const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://kotacom.id').replace(
 export function GET(): NextResponse {
   const isLive = process.env.NEXT_PUBLIC_IS_LIVE === 'true'
 
+  const aiCrawlers = [
+    'GPTBot',
+    'ChatGPT-User',
+    'ClaudeBot',
+    'PerplexityBot',
+    'Google-Extended',
+    'Applebot-Extended',
+    'Bytespider',
+    'CCBot',
+    'anthropic-ai',
+    'FacebookBot',
+    'Amazonbot',
+  ]
+
+  const aiRules = aiCrawlers.map((c) => `User-agent: ${c}\nAllow: /`).join('\n\n')
+
   const body = isLive
     ? `User-agent: *
 Allow: /
@@ -22,6 +38,8 @@ Disallow: /api/exit-preview
 Disallow: /api/revalidate
 Disallow: /preview
 Disallow: /thanks-for-subscribing
+
+${aiRules}
 
 Sitemap: ${base}/sitemap.xml
 Host: ${base}

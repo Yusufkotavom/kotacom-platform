@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "test": "tsx --test src/generator/__tests__/*.test.ts",
     "generator:run": "tsx scripts/generator-run.mjs",
+    "generator:cli": "tsx scripts/generator.ts",
     "prettier:fix": "prettier --write ."
   },
   "dependencies": {

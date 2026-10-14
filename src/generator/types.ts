@@ -17,7 +17,7 @@ export type GeneratorRow = {
   localCondition?: null | string
   offer?: null | string
   primaryKeyword: string
-  secondaryKeywords?: null | string[]
+  secondaryKeywords?: null | string | string[]
   service?: null | string
   tokens?: GeneratorRowToken[] | null
 }

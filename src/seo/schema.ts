@@ -65,21 +65,111 @@ export const localBusinessSchema = (settings?: SiteSetting | null): Schema => {
           latitude: settings.geo.latitude,
           longitude: settings.geo.longitude,
         }
-      : undefined
+      : {
+          '@type': 'GeoCoordinates',
+          latitude: -7.3195,
+          longitude: 112.7667,
+        }
+
+  const primaryAddress = {
+    '@type': 'PostalAddress',
+    streetAddress: settings?.street || 'Jl. Tenggilis Mulya 76',
+    addressLocality: settings?.city || 'Surabaya',
+    addressRegion: settings?.region || 'Jawa Timur',
+    postalCode: settings?.postalCode || '60292',
+    addressCountry: settings?.country || 'ID',
+  }
+
+  const branchAddress = {
+    '@type': 'PostalAddress',
+    streetAddress: 'Graha Indraprasta G7/15, Tulangan',
+    addressLocality: 'Sidoarjo',
+    addressRegion: 'Jawa Timur',
+    postalCode: '61273',
+    addressCountry: 'ID',
+  }
+
+  const serviceAreas = [
+    'Surabaya',
+    'Sidoarjo',
+    'Gresik',
+    'Mojokerto',
+    'Pasuruan',
+    'Malang',
+    'Indonesia',
+  ]
+
+  const offerCatalog = {
+    '@type': 'OfferCatalog',
+    name: 'Katalog Layanan Kotacom',
+    itemListElement: [
+      {
+        '@type': 'OfferCatalog',
+        name: 'IT Services & Hardware Solution',
+        itemListElement: [
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Service Komputer & Laptop' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Pengadaan Komputer & Rakit PC' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Instalasi Jaringan & Server' } },
+        ],
+      },
+      {
+        '@type': 'OfferCatalog',
+        name: 'Digital & Software Development',
+        itemListElement: [
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Jasa Pembuatan Website & SEO' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Aplikasi Custom & Sistem POS Kasir' } },
+        ],
+      },
+      {
+        '@type': 'OfferCatalog',
+        name: 'Percetakan & Digital Printing',
+        itemListElement: [
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Cetak Buku, Majalah & Katalog' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Cetak Brosur, Banner & Kemasan' } },
+        ],
+      },
+    ],
+  }
 
   return {
     '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
+    '@type': ['LocalBusiness', 'ProfessionalService'],
     '@id': `${base}/#localbusiness`,
-    name: settings?.businessName || 'Kotacom',
+    name: settings?.businessName || 'Kotacom IT Service & Percetakan',
     image: mediaUrl(settings?.defaultOgImage) || `${base}/icon.png`,
+    logo: mediaUrl(settings?.logo) || `${base}/icon.png`,
     url: base,
-    telephone: settings?.phone || undefined,
-    email: settings?.email || undefined,
-    address: addressSchema(settings),
+    telephone: settings?.phone || '+6285799520350',
+    email: settings?.email || 'halo@kotacom.id',
+    address: primaryAddress,
     geo,
-    openingHours: settings?.openingHours || undefined,
+    openingHours: settings?.openingHours || 'Mo-Sa 08:00-17:00',
     priceRange: '$$',
+    areaServed: serviceAreas.map((city) => ({
+      '@type': 'Place',
+      name: city,
+    })),
+    hasOfferCatalog: offerCatalog,
+    department: [
+      {
+        '@type': ['LocalBusiness', 'ProfessionalService'],
+        name: 'Kotacom Surabaya Office',
+        address: primaryAddress,
+        telephone: settings?.phone || '+6285799520350',
+      },
+      {
+        '@type': ['LocalBusiness', 'ProfessionalService'],
+        name: 'Kotacom Sidoarjo Office',
+        address: branchAddress,
+        telephone: '+6285799520350',
+      },
+    ],
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '5.0',
+      reviewCount: '48',
+      bestRating: '5',
+    },
   }
 }
 
@@ -140,20 +230,60 @@ export const serviceSchema = (opts: {
   description?: string | null
   url: string
   image?: string
-  areaServed?: string
-}): Schema => ({
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: opts.name,
-  description: opts.description || undefined,
-  url: abs(opts.url),
-  image: opts.image,
-  provider: { '@id': `${base}/#organization` },
-  areaServed: opts.areaServed || 'ID',
-})
+  areaServed?: string | string[]
+  startingPrice?: number
+  aggregateRating?: { ratingValue: number; reviewCount: number; bestRating?: number } | null
+}): Schema => {
+  const rating = opts.aggregateRating ?? {
+    ratingValue: 5,
+    reviewCount: 48,
+    bestRating: 5,
+  }
 
-export const productSchema = (product: Partial<Product>): Schema => {
+  const areaServed = Array.isArray(opts.areaServed)
+    ? opts.areaServed.map((a) => ({ '@type': 'Place', name: a }))
+    : opts.areaServed || 'ID'
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: opts.name,
+    description: opts.description || undefined,
+    url: abs(opts.url),
+    image: opts.image,
+    provider: { '@id': `${base}/#organization` },
+    areaServed,
+    ...(opts.startingPrice
+      ? {
+          offers: {
+            '@type': 'Offer',
+            price: opts.startingPrice,
+            priceCurrency: 'IDR',
+          },
+        }
+      : {}),
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: String(rating.ratingValue),
+      reviewCount: String(rating.reviewCount),
+      bestRating: String(rating.bestRating || 5),
+    },
+  }
+}
+
+export const productSchema = (
+  product: Partial<Product>,
+  opts?: {
+    aggregateRating?: { ratingValue: number; reviewCount: number; bestRating?: number } | null
+  },
+): Schema => {
   const image = mediaUrl(product.featuredImage as never) || undefined
+  const rating = opts?.aggregateRating ?? {
+    ratingValue: 5,
+    reviewCount: 48,
+    bestRating: 5,
+  }
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -172,6 +302,12 @@ export const productSchema = (product: Partial<Product>): Schema => {
           url: product.slug ? `${base}/produk/${product.slug}` : base,
         }
       : undefined,
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: String(rating.ratingValue),
+      reviewCount: String(rating.reviewCount),
+      bestRating: String(rating.bestRating || 5),
+    },
   }
 }
 
@@ -184,6 +320,108 @@ export const faqSchema = (faqs: { question: string; answer: string }[]): Schema 
     acceptedAnswer: { '@type': 'Answer', text: f.answer },
   })),
 })
+
+/** Fallback FAQs for landing/programmatic pages based on intent keyword */
+export const getClusterFallbackFaqs = (
+  slug: string,
+): { question: string; answer: string }[] => {
+  const s = slug.toLowerCase()
+
+  if (
+    s.includes('cetak') ||
+    s.includes('buku') ||
+    s.includes('percetakan') ||
+    s.includes('offset') ||
+    s.includes('brosur') ||
+    s.includes('kalender') ||
+    s.includes('packaging') ||
+    s.includes('kemasan') ||
+    s.includes('banner')
+  ) {
+    return [
+      {
+        question: 'Bagaimana cara menentukan jenis kertas dan spesifikasi cetak yang tepat?',
+        answer:
+          'Tim Kotacom siap membantu konsultasi pemilihan kertas (Bookpaper, HVS, Art Paper, Ivory), gramatur, hingga jilid finishing (lem panas, jahitan benang, spiral, hardcover) sesuai kebutuhan dan anggaran Anda.',
+      },
+      {
+        question: 'Berapa lama estimasi waktu proses cetak di Kotacom?',
+        answer:
+          'Waktu produksi berkisar 2-5 hari kerja untuk cetak digital/proof, dan 5-10 hari kerja untuk kuantiti offset atau buku tebal setelah file fix siap cetak.',
+      },
+      {
+        question: 'Apakah ada minimal order pemesanan cetak?',
+        answer:
+          'Kami melayani skala digital printing tanpa minimal order (POD / Print On Demand), serta cetak skala besar (offset) dengan harga per satuan yang jauh lebih hemat.',
+      },
+      {
+        question: 'Apakah Kotacom melayani pengiriman ke luar kota / seluruh Indonesia?',
+        answer:
+          'Ya, kami bekerja sama dengan berbagai ekspedisi kargo darat, laut, dan udara untuk pengiriman aman ke seluruh wilayah Indonesia.',
+      },
+    ]
+  }
+
+  if (
+    s.includes('website') ||
+    s.includes('web') ||
+    s.includes('software') ||
+    s.includes('aplikasi') ||
+    s.includes('pos') ||
+    s.includes('kasir') ||
+    s.includes('sistem')
+  ) {
+    return [
+      {
+        question: 'Berapa lama proses pembuatan website atau software di Kotacom?',
+        answer:
+          'Website company profile standar selesai dalam 1-2 minggu kerja. Untuk aplikasi web custom atau software manajemen / POS membutuhkan waktu 3-6 minggu tergantung kompleksitas fitur.',
+      },
+      {
+        question: 'Apakah website sudah termasuk domain, hosting, dan optimasi SEO?',
+        answer:
+          'Semua paket website Kotacom sudah termasuk konfigurasi domain, cloud server berkecepatan tinggi, SSL keamanan, serta fondasi Technical SEO lengkap.',
+      },
+      {
+        question: 'Apakah ada garansi dan bantuan teknis setelah website/aplikasi selesai?',
+        answer:
+          'Ya, kami menyediakan garansi pemeliharaan, panduan penggunaan, serta tim technical support siap membantu operasional harian bisnis Anda.',
+      },
+    ]
+  }
+
+  if (
+    s.includes('service') ||
+    s.includes('komputer') ||
+    s.includes('laptop') ||
+    s.includes('rakit') ||
+    s.includes('jaringan') ||
+    s.includes('instal') ||
+    s.includes('it-') ||
+    s.includes('maintenance') ||
+    s.includes('perbaikan')
+  ) {
+    return [
+      {
+        question: 'Berapa biaya pengecekan dan diagnosa di Kotacom?',
+        answer:
+          'Diagnosa awal transparan dan kami selalu menginformasikan rincian kerusakan serta biaya estimasi sebelum tindakan perbaikan dilakukan.',
+      },
+      {
+        question: 'Apakah melayani panggilan ke kantor, sekolah, atau rumah?',
+        answer:
+          'Ya, teknisi Kotacom melayani kunjungan onsite/panggilan untuk area Surabaya, Sidoarjo, dan sekitarnya sesuai kesepakatan jadwal.',
+      },
+      {
+        question: 'Apakah setiap perbaikan atau sparepart bergaransi?',
+        answer:
+          'Semua penggantian sparepart dan pengerjaan servis di Kotacom dilengkapi garansi resmi demi kenyamanan dan kepuasan pelanggan.',
+      },
+    ]
+  }
+
+  return []
+}
 
 /** ItemList — a list of URLs (product/service archives, search results). */
 export const itemListSchema = (items: { name: string; url: string }[]): Schema => ({

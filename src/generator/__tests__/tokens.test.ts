@@ -40,3 +40,15 @@ test('buildTokens honours tokenDefinitions restriction', () => {
   )
   assert.deepEqual(tokens, { kota: 'Bandung' })
 })
+
+test('buildTokens accepts secondaryKeywords as a CSV string', () => {
+  const tokens = buildTokens(
+    {},
+    {
+      city: 'Jakarta',
+      primaryKeyword: 'Cetak Kalender',
+      secondaryKeywords: 'cetak kalender jakarta, kalender dinding jakarta ,kalender meja',
+    },
+  )
+  assert.equal(tokens.secondaryKeywords, 'cetak kalender jakarta, kalender dinding jakarta, kalender meja')
+})

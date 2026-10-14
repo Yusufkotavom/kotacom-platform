@@ -14,6 +14,7 @@ import {
   extractDescriptionFromLayout,
   extractFaqsFromLayout,
   faqSchema,
+  getClusterFallbackFaqs,
   serviceSchema,
   webPageSchema,
 } from '@root/seo/schema'
@@ -27,7 +28,7 @@ const getPage = async (slug, draft?) =>
     : unstable_cache(fetchPage, [`page-${slug}`], { revalidate: 300 })(slug)
 
 // Top-level "money" pages that are lead-gen service landing pages → emit Service
-// schema (matches/extends the live kotacom.id graph). Anything else stays a WebPage.
+// schema (matches/extends the live kotacom.id graph).
 const SERVICE_SLUGS = new Set([
   'percetakan',
   'pembuatan-website',
@@ -35,6 +36,27 @@ const SERVICE_SLUGS = new Set([
   'sistem-pos',
   'layanan',
 ])
+
+const isServiceSlug = (slugStr: string): boolean => {
+  const s = slugStr.toLowerCase()
+  if (SERVICE_SLUGS.has(s)) return true
+  const prefixes = [
+    'jasa-',
+    'service-',
+    'servis-',
+    'cetak-',
+    'pasang-',
+    'instal-',
+    'install-',
+    'rakit-',
+    'perbaikan-',
+    'pembuatan-',
+    'bikin-',
+    'sewa-',
+    'kursus-',
+  ]
+  return prefixes.some((p) => s.startsWith(p) || s.includes('/' + p))
+}
 
 const Page = async ({
   params,
@@ -59,9 +81,13 @@ const Page = async ({
   }))
   const desc =
     page.meta?.description || page.description || extractDescriptionFromLayout(page.layout) || null
-  const faqs = extractFaqsFromLayout(page.layout)
-  const topSlug = Array.isArray(slug) ? slug[0] : slug
-  const isService = SERVICE_SLUGS.has(topSlug)
+  const slugPath = Array.isArray(slug) ? slug.join('/') : String(slug)
+  const isService = isServiceSlug(slugPath)
+
+  let faqs = extractFaqsFromLayout(page.layout)
+  if (!faqs.length && isService) {
+    faqs = getClusterFallbackFaqs(slugPath)
+  }
 
   const schema: Record<string, unknown>[] = [
     breadcrumbSchema(breadcrumbs.length ? breadcrumbs : [{ name: page.title || 'Halaman', url }]),
@@ -78,7 +104,15 @@ const Page = async ({
         name: page.title || 'Layanan Kotacom',
         description: desc,
         url,
-        areaServed: 'ID',
+        areaServed: [
+          'Surabaya',
+          'Sidoarjo',
+          'Gresik',
+          'Mojokerto',
+          'Pasuruan',
+          'Malang',
+          'Indonesia',
+        ],
       }),
     )
   }

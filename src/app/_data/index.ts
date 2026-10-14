@@ -125,7 +125,8 @@ export const fetchPages = async (): Promise<Partial<Page>[]> => {
   const data = await payload.find({
     collection: 'pages',
     depth: 0,
-    limit: 300,
+    limit: 2500,
+    pagination: false,
     select: {
       breadcrumbs: true,
     },
@@ -153,7 +154,8 @@ export const fetchPosts = async (): Promise<Partial<Post>[]> => {
   const data = await payload.find({
     collection: 'posts',
     depth: 1,
-    limit: 300,
+    limit: 1000,
+    pagination: false,
     select: {
       slug: true,
       category: true,
@@ -348,7 +350,8 @@ export const fetchCaseStudies = async (): Promise<Partial<CaseStudy>[]> => {
   const data = await payload.find({
     collection: 'case-studies',
     depth: 0,
-    limit: 300,
+    limit: 1000,
+    pagination: false,
     select: {
       slug: true,
     },
@@ -390,7 +393,8 @@ export const fetchProducts = async (): Promise<Partial<Product>[]> => {
   const data = await payload.find({
     collection: 'products',
     depth: 0,
-    limit: 300,
+    limit: 1000,
+    pagination: false,
     select: { slug: true, offeringType: true },
     sort: '-createdAt',
   })

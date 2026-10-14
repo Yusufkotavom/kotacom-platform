@@ -6,6 +6,7 @@ import { isAdmin } from '../access/isAdmin'
 import { publishedOnly } from '../access/publishedOnly'
 import { Banner } from '../blocks/Banner'
 import { generatorField } from '../fields/generatorField'
+import { isGeneratedField, syncIsGenerated } from '../fields/isGenerated'
 import richText from '../fields/richText'
 import { slugField } from '../fields/slug'
 import { formatPreviewURL } from '../utilities/formatPreviewURL'
@@ -24,6 +25,7 @@ export const Posts: CollectionConfig = {
     update: isAdmin,
   },
   admin: {
+    defaultColumns: ['title', 'category', 'isGenerated', '_status', 'publishedOn', 'updatedAt'],
     livePreview: {
       url: async ({ data, req }) => {
         let categorySlug: string | undefined
@@ -298,6 +300,7 @@ export const Posts: CollectionConfig = {
       label: 'Guest Author Socials',
     },
     generatorField,
+    isGeneratedField,
     {
       name: 'publishedOn',
       type: 'date',
@@ -379,6 +382,7 @@ export const Posts: CollectionConfig = {
         }
       },
     ],
+    beforeChange: [syncIsGenerated],
   },
   versions: {
     drafts: true,
