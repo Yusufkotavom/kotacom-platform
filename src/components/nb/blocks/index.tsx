@@ -221,12 +221,22 @@ function HoverCardsBlock({ fields, id }: { fields: any; id?: string }) {
 }
 
 function StatementBlock({ fields, id }: { fields: any; id?: string }) {
-  const { richText, media } = fields || {}
+  const { richText, media, links, code, assetType } = fields || {}
+  const hasLinks = Array.isArray(links) && links.length > 0
   return (
     <Section bg="canvas" id={id}>
       <div className="mx-auto max-w-3xl text-center">
         {media ? <NewMedia m={media} className="mx-auto mb-8 max-w-md" /> : null}
         {richText ? <RichText content={richText} /> : null}
+        {hasLinks ? (
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            {links.map((l: any, i: number) => (
+              <LinkButton key={i} href={hrefOf(l?.link)} variant={i === 0 ? 'primary' : 'outline'}>
+                {l?.link?.label || 'Selengkapnya'}
+              </LinkButton>
+            ))}
+          </div>
+        ) : null}
       </div>
     </Section>
   )
@@ -245,12 +255,24 @@ function BannerBlock({ fields, id }: { fields: any; id?: string }) {
 }
 
 function CalloutBlock({ fields, id }: { fields: any; id?: string }) {
-  const { richText, author, role } = fields || {}
+  const { richText, author, role, logo, images } = fields || {}
+  const hasImages = Array.isArray(images) && images.length > 0
   return (
     <Section bg="canvas" id={id}>
       <div className="mx-auto max-w-3xl border-4 border-ink bg-paper p-8 shadow-nb-lg">
         <div className="text-center">
+          {logo ? <NewMedia m={logo} className="mx-auto mb-6 h-16 w-auto max-w-[200px] object-contain shadow-none border-0" /> : null}
           {richText ? <RichText content={richText} /> : null}
+          {hasImages ? (
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              {images.map((item: any, i: number) => {
+                const img = item?.image || item
+                return img ? (
+                  <NewMedia key={i} m={img} className="max-w-[240px]" />
+                ) : null
+              })}
+            </div>
+          ) : null}
           {author ? (
             <p className="mt-6 font-mono text-sm font-bold uppercase tracking-widest">
               {author}
@@ -288,6 +310,47 @@ function LinkGridBlock({ fields, id }: { fields: any; id?: string }) {
 
 function isRichText(v: any): boolean {
   return v && typeof v === 'object' && v.root && Array.isArray(v.root.children)
+}
+
+function isMedia(v: any): boolean {
+  return (
+    v &&
+    typeof v === 'object' &&
+    !Array.isArray(v) &&
+    (typeof v.url === 'string' || (v.sizes && typeof v.sizes === 'object'))
+  )
+}
+
+function findMediaItems(fields: any): any[] {
+  const out: any[] = []
+  const visit = (o: any, depth = 0) => {
+    if (!o || typeof o !== 'object' || depth > 3) return
+    if (isMedia(o)) {
+      out.push(o)
+      return
+    }
+    if (Array.isArray(o)) {
+      o.forEach((x) => visit(x, depth + 1))
+      return
+    }
+    for (const [k, v] of Object.entries(o)) {
+      if (['media', 'image', 'images', 'logo', 'background'].includes(k) || isMedia(v)) {
+        if (isMedia(v)) {
+          out.push(v)
+        } else if (Array.isArray(v)) {
+          v.forEach((item) => {
+            if (isMedia(item)) out.push(item)
+            else if (item && isMedia(item.image)) out.push(item.image)
+            else if (item && isMedia(item.media)) out.push(item.media)
+          })
+        }
+      } else {
+        visit(v, depth + 1)
+      }
+    }
+  }
+  visit(fields)
+  return out
 }
 
 function findLinks(fields: any): AnyLink[] {
@@ -348,8 +411,9 @@ function GenericBlock({ fields, id }: { fields: any; id?: string }) {
   collectCards(fields)
 
   const links = findLinks(fields)
+  const mediaItems = findMediaItems(fields)
 
-  if (richTexts.length === 0 && cards.length === 0 && links.length === 0) return null
+  if (richTexts.length === 0 && cards.length === 0 && links.length === 0 && mediaItems.length === 0) return null
 
   return (
     <Section bg="canvas" id={id}>
@@ -358,6 +422,15 @@ function GenericBlock({ fields, id }: { fields: any; id?: string }) {
           <RichText content={rt} />
         </div>
       ))}
+      {mediaItems.length > 0 ? (
+        <div className="mb-8 flex flex-wrap gap-6 justify-center">
+          {mediaItems.slice(0, 4).map((m, i) => (
+            <div key={i} className="max-w-md w-full">
+              <NewMedia m={m} />
+            </div>
+          ))}
+        </div>
+      ) : null}
       {links.length > 0 ? (
         <div className="mb-8 flex flex-wrap gap-3">
           {links.map((l, i) => (
@@ -522,6 +595,44 @@ function LogoGridBlock({ fields }: { fields: any; id?: string }) {
   )
 }
 
+function SliderBlock({ fields, id }: { fields: any; id?: string }) {
+  const { quoteSlides, introContent } = fields || {}
+  const slides = Array.isArray(quoteSlides) ? quoteSlides : []
+  if (slides.length === 0 && !introContent) return null
+  return (
+    <Section bg="canvas" id={id}>
+      {introContent ? (
+        <div className="mb-8 max-w-3xl">
+          <RichText content={introContent} />
+        </div>
+      ) : null}
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {slides.map((s: any, i: number) => (
+          <Card key={s.id || i} cornerShape="circle" cornerTone="yellow" className="p-7">
+            <NumBadge n={String(i + 1).padStart(2, '0')} />
+            {s.quote ? (
+              <blockquote className="mt-4 font-medium italic leading-relaxed">
+                “{s.quote}”
+              </blockquote>
+            ) : null}
+            {s.richText ? (
+              <div className="mt-4">
+                <RichText content={s.richText} />
+              </div>
+            ) : null}
+            {s.author ? (
+              <p className="mt-5 font-mono text-xs font-bold uppercase tracking-wider text-ink/80">
+                {s.author}
+                {s.role ? `, ${s.role}` : ''}
+              </p>
+            ) : null}
+          </Card>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
 function ComparisonTableBlock({ fields }: { fields: any; id?: string }) {
   const header = fields?.header || {}
   const rows = fields?.rows || []
@@ -570,7 +681,34 @@ function ComparisonTableBlock({ fields }: { fields: any; id?: string }) {
   )
 }
 
+function CodeDisplayBlock({ fields, id }: { fields: any; id?: string }) {
+  const { code, heading, richText } = fields || {}
+  const rawCode = typeof code === 'string' ? code : ''
+  return (
+    <Section bg="canvas" id={id}>
+      <div className="mx-auto max-w-4xl border-4 border-ink bg-nb-ink text-white p-6 shadow-nb-lg">
+        {heading ? (
+          <div className="mb-4 border-b-2 border-white/20 pb-2 font-mono text-sm uppercase tracking-wider text-nb-yellow">
+            {heading}
+          </div>
+        ) : null}
+        {richText ? (
+          <div className="mb-4 text-white/90">
+            <RichText content={richText} />
+          </div>
+        ) : null}
+        {rawCode ? (
+          <pre className="overflow-x-auto p-4 font-mono text-sm leading-relaxed text-green-400 bg-black/60 border-2 border-white/10">
+            <code>{rawCode}</code>
+          </pre>
+        ) : null}
+      </div>
+    </Section>
+  )
+}
+
 const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
+  form: GenericBlock,
   content: ContentBlock,
   aiContent: AiContentBlock,
   cardGrid: CardGridBlock,
@@ -592,16 +730,18 @@ const RENDERERS: Record<string, React.FC<{ fields: any; id?: string }>> = {
   caseStudyCards: GenericBlock,
   caseStudiesHighlight: GenericBlock,
   stickyHighlights: GenericBlock,
-  slider: GenericBlock,
-  codeFeature: GenericBlock,
-  code: GenericBlock,
+  slider: SliderBlock,
+  codeFeature: CodeDisplayBlock,
+  code: CodeDisplayBlock,
   whatsappCta: WhatsAppCtaBlock,
 }
 
 function fieldsOf(block: any): any {
   if (!block) return {}
   const key = Object.keys(block).find((k) => k.endsWith('Fields'))
-  return key ? block[key] : {}
+  if (key && block[key]) return block[key]
+  // Fallback: if block itself contains fields directly (or flat shape)
+  return block
 }
 
 export function BauhausBlock({ block }: { block: any }) {
