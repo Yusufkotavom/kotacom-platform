@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Archive } from '@components/Archive'
+import { BauhausCategoryArchive } from '@components/nb/CategoryArchive'
 import { BauhausPost } from '@components/nb/Post'
 import { JsonLd } from '@components/SEO/JsonLd'
 import {
@@ -51,6 +51,10 @@ const PostsSegment = async ({
 
   if (archive?.posts?.docs) {
     const posts = archive.posts.docs as { title?: string; slug?: string }[]
+    const archives = draft
+      ? await fetchArchives()
+      : await unstable_cache(fetchArchives, ['archives'], { revalidate: 300 })()
+
     return (
       <React.Fragment>
         <JsonLd
@@ -73,7 +77,11 @@ const PostsSegment = async ({
             }),
           ]}
         />
-        <Archive category={category} />
+        <BauhausCategoryArchive
+          archive={archive}
+          archives={archives || []}
+          category={category}
+        />
       </React.Fragment>
     )
   }
