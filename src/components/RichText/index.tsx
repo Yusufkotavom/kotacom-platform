@@ -72,6 +72,18 @@ export const jsxConverters: (args: { toc?: boolean }) => JSXConvertersFunction<N
       upload: ({ node }) => {
         return <RichTextUpload node={node} />
       },
+      heading: ({ node, nodesToJSX }) => {
+        const Tag = (node.tag || 'h2') as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+        const rawText = node.children?.map((c: any) => c.text || '').join('').trim() || ''
+        const id = rawText
+          ? rawText
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .slice(0, 50)
+          : undefined
+        return <Tag id={id}>{nodesToJSX({ nodes: node.children })}</Tag>
+      },
       list: ({ node, nodesToJSX }) => {
         const Tag = node.listType === 'number' ? 'ol' : 'ul'
         return <Tag className={`list-inside ${node.listType === 'number' ? 'list-decimal' : 'list-disc'} mb-4 pl-4`}>{nodesToJSX({ nodes: node.children })}</Tag>

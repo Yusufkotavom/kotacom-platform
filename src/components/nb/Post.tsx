@@ -1,17 +1,21 @@
 import Link from 'next/link'
 import { Calendar, ChevronRight, Clock, Folder, User } from 'lucide-react'
 import { RichText } from '@components/RichText/index'
+import type { Post } from '@types'
 import { BauhausBlocks } from './blocks'
 import { LinkButton } from './Button'
 import { Pill } from './Pill'
+import { RelatedPostsSection } from './RelatedPosts'
 import { Section } from './Section'
+import { ShareBar } from './ShareBar'
+import { TableOfContents, type TocItem } from './TableOfContents'
 
-function fmtDate(d?: string) {
-  if (!d) return null
+function fmtDate(d?: string | null): string {
+  if (!d) return ''
   try {
     return new Date(d).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
   } catch {
-    return null
+    return ''
   }
 }
 
@@ -24,6 +28,51 @@ function readingTime(content: any): string {
   } catch {
     return '3 menit baca'
   }
+}
+
+function extractHeadings(content: any): TocItem[] {
+  const headings: TocItem[] = []
+  if (!content) return headings
+
+  const scanNode = (node: any) => {
+    if (!node) return
+    if (node.tag === 'h2' || node.tag === 'h3' || node.type === 'h2' || node.type === 'h3') {
+      const text = node.children?.map((c: any) => c.text || '').join('').trim()
+      if (text) {
+        const id = text
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .slice(0, 50)
+        headings.push({
+          id,
+          text,
+          level: node.tag === 'h3' || node.type === 'h3' ? 3 : 2,
+        })
+      }
+    }
+    if (Array.isArray(node.children)) {
+      node.children.forEach(scanNode)
+    }
+  }
+
+  if (Array.isArray(content)) {
+    content.forEach((block) => {
+      // Check block fields like richText or generatedText
+      const blockContent = block?.fields?.richText || block?.fields?.generatedText || block?.richText
+      if (blockContent) {
+        if (Array.isArray(blockContent)) blockContent.forEach(scanNode)
+        else if (blockContent.root?.children) blockContent.root.children.forEach(scanNode)
+      }
+      if (block?.root?.children) {
+        block.root.children.forEach(scanNode)
+      }
+    })
+  } else if (content?.root?.children) {
+    content.root.children.forEach(scanNode)
+  }
+
+  return headings
 }
 
 export function BauhausPostCta() {
@@ -42,12 +91,15 @@ export function BauhausPostCta() {
   )
 }
 
-export function BauhausPost({ post }: { post: any }) {
+export function BauhausPost({
+  post,
+  relatedPosts,
+}: {
+  post: any
+  relatedPosts?: Partial<Post>[]
+}) {
   const cat = post?.category && typeof post.category === 'object' ? post.category : null
   const image = post?.image && typeof post.image === 'object' ? post.image : null
-  const related = Array.isArray(post?.relatedPosts)
-    ? post.relatedPosts.filter((r: any) => r && typeof r === 'object' && r.slug)
-    : []
   const date = fmtDate(post?.publishedOn)
   const author =
     Array.isArray(post?.authors) && post.authors[0]?.name
@@ -56,6 +108,14 @@ export function BauhausPost({ post }: { post: any }) {
         ? post.guestAuthor
         : 'Kotacom Admin'
   const estTime = readingTime(post?.content)
+  const tocItems = extractHeadings(post?.content)
+
+  const effectiveRelated =
+    relatedPosts && relatedPosts.length > 0
+      ? relatedPosts
+      : Array.isArray(post?.relatedPosts)
+        ? post.relatedPosts.filter((r: any) => r && typeof r === 'object' && r.slug)
+        : []
 
   return (
     <>
@@ -114,6 +174,9 @@ export function BauhausPost({ post }: { post: any }) {
               <RichText content={post.excerpt} />
             </div>
           ) : null}
+
+          {/* Table of Contents */}
+          {tocItems.length > 0 && <TableOfContents items={tocItems} />}
         </article>
       </Section>
 
@@ -140,29 +203,21 @@ export function BauhausPost({ post }: { post: any }) {
         </Section>
       ) : null}
 
-      {related.length > 0 ? (
-        <Section bg="canvas">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6">
-            <h2 className="mb-8 text-3xl uppercase tracking-tighter">Artikel lain</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((r: any, i: number) => (
-                <a
-                  key={r.id || i}
-                  href={`/posts/${r.slug}`}
-                  className="block border-4 border-ink bg-paper p-5 shadow-nb press"
-                >
-                  <span className="text-lg font-black uppercase leading-tight tracking-tight">
-                    {r.title || r.slug}
-                  </span>
-                  <span className="mt-3 block font-mono text-xs font-bold uppercase tracking-widest">
-                    Baca artikel &rarr;
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-        </Section>
-      ) : null}
+      {/* Social Share Bar */}
+      <Section bg="canvas" className="py-2">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <ShareBar
+            title={post?.title || 'Artikel Kotacom'}
+            url={`/posts/${post?.slug || ''}`}
+            slug={post?.slug}
+          />
+        </div>
+      </Section>
+
+      {/* Related Posts Section */}
+      {effectiveRelated.length > 0 && (
+        <RelatedPostsSection posts={effectiveRelated} />
+      )}
 
       <BauhausPostCta />
     </>

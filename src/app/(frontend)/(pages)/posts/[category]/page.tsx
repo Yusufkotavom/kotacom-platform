@@ -3,9 +3,21 @@ import type { Metadata } from 'next'
 import { Archive } from '@components/Archive'
 import { BauhausPost } from '@components/nb/Post'
 import { JsonLd } from '@components/SEO/JsonLd'
-import { fetchArchive, fetchArchives, fetchPostBySlug, fetchPosts } from '@data'
+import {
+  fetchArchive,
+  fetchArchives,
+  fetchPostBySlug,
+  fetchPosts,
+  fetchRelatedPosts,
+} from '@data'
 import { buildMetadata } from '@root/seo/metadata'
-import { articleSchema, breadcrumbSchema, collectionPageSchema } from '@root/seo/schema'
+import {
+  articleSchema,
+  breadcrumbSchema,
+  collectionPageSchema,
+  faqSchema,
+  getClusterFallbackFaqs,
+} from '@root/seo/schema'
 import { buildSafe } from '@root/utilities/buildSafe'
 import { richTextToPlain } from '@root/utilities/richTextToPlain'
 import { unstable_cache } from 'next/cache'
@@ -83,6 +95,11 @@ const PostsSegment = async ({
         ? post.guestAuthor
         : null
   const categoryName = typeof post.category === 'object' ? post.category?.name : null
+  const categoryId = typeof post.category === 'object' ? (post.category as any)?.id : undefined
+  const relatedPosts = await fetchRelatedPosts(post.id, categoryId, 3)
+
+  // Cluster FAQ schema for rich snippet enhancements
+  const faqs = getClusterFallbackFaqs(slug)
 
   return (
     <React.Fragment>
@@ -107,9 +124,10 @@ const PostsSegment = async ({
             authorName,
             articleSection: categoryName,
           }),
+          ...(faqs && faqs.length > 0 ? [faqSchema(faqs)] : []),
         ]}
       />
-      <BauhausPost post={post} />
+      <BauhausPost post={post} relatedPosts={relatedPosts} />
     </React.Fragment>
   )
 }

@@ -6,9 +6,14 @@ import { PayloadRedirects } from '@components/PayloadRedirects/index'
 import { BauhausPost } from '@components/nb/Post'
 import { RefreshRouteOnSave } from '@components/RefreshRouterOnSave/index'
 import { JsonLd } from '@components/SEO/JsonLd'
-import { fetchBlogPost, fetchPosts } from '@data'
+import { fetchBlogPost, fetchPosts, fetchRelatedPosts } from '@data'
 import { buildMetadata } from '@root/seo/metadata'
-import { articleSchema, breadcrumbSchema } from '@root/seo/schema'
+import {
+  articleSchema,
+  breadcrumbSchema,
+  faqSchema,
+  getClusterFallbackFaqs,
+} from '@root/seo/schema'
 import { richTextToPlain } from '@root/utilities/richTextToPlain'
 import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
@@ -38,6 +43,14 @@ const PostPage = async ({
 
   const url = `/${category}/${slug}`
 
+  const categoryId =
+    blogPost && typeof blogPost.category === 'object'
+      ? (blogPost.category as any)?.id
+      : undefined
+  const relatedPosts = blogPost
+    ? await fetchRelatedPosts(blogPost.id, categoryId, 3)
+    : []
+
   // Canonical permalink for a post is the FLAT /posts/<slug>. The
   // category-qualified URL 308-redirects there so search engines consolidate
   // on one URL. Skipped in draft preview so the editor can preview this shape.
@@ -56,6 +69,7 @@ const PostPage = async ({
         ? blogPost.guestAuthor
         : null
   const categoryName = typeof blogPost.category === 'object' ? blogPost.category?.name : null
+  const faqs = getClusterFallbackFaqs(slug)
 
   return (
     <React.Fragment>
@@ -82,9 +96,10 @@ const PostPage = async ({
             authorName,
             articleSection: categoryName,
           }),
+          ...(faqs && faqs.length > 0 ? [faqSchema(faqs)] : []),
         ]}
       />
-      <BauhausPost post={blogPost} />
+      <BauhausPost post={blogPost} relatedPosts={relatedPosts} />
     </React.Fragment>
   )
 }

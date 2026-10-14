@@ -345,6 +345,74 @@ export const fetchPostBySlug = async (slug: string): Promise<Partial<Post>> => {
   return data.docs[0]
 }
 
+export const fetchRelatedPosts = async (
+  currentPostId?: number | string,
+  categoryId?: number | string,
+  limit: number = 3,
+): Promise<Partial<Post>[]> => {
+  const payload = await getPayload({ config })
+  const currentDate = new Date()
+
+  const andConditions: any[] = [
+    { publishedOn: { less_than_equal: currentDate } },
+    { _status: { equals: 'published' } },
+  ]
+
+  if (currentPostId) {
+    andConditions.push({ id: { not_equals: currentPostId } })
+  }
+
+  if (categoryId) {
+    andConditions.push({ category: { equals: categoryId } })
+  }
+
+  const data = await payload.find({
+    collection: 'posts',
+    depth: 1,
+    limit,
+    select: {
+      slug: true,
+      title: true,
+      category: true,
+      publishedOn: true,
+      image: true,
+      excerpt: true,
+    },
+    sort: '-publishedOn',
+    where: {
+      and: andConditions,
+    },
+  })
+
+  // Fallback if category has no other posts: fetch any latest posts
+  if (data.docs.length === 0 && categoryId) {
+    const fallback = await payload.find({
+      collection: 'posts',
+      depth: 1,
+      limit,
+      select: {
+        slug: true,
+        title: true,
+        category: true,
+        publishedOn: true,
+        image: true,
+        excerpt: true,
+      },
+      sort: '-publishedOn',
+      where: {
+        and: [
+          { publishedOn: { less_than_equal: currentDate } },
+          { _status: { equals: 'published' } },
+          ...(currentPostId ? [{ id: { not_equals: currentPostId } }] : []),
+        ],
+      },
+    })
+    return fallback.docs
+  }
+
+  return data.docs
+}
+
 export const fetchCaseStudies = async (): Promise<Partial<CaseStudy>[]> => {
   const payload = await getPayload({ config })
   const data = await payload.find({
