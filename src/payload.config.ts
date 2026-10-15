@@ -185,6 +185,19 @@ export default buildConfig({
                 return
               },
             } as TextField,
+            {
+              name: 'appearance',
+              type: 'select',
+              defaultValue: 'default',
+              label: 'Appearance / Gaya Link',
+              options: [
+                { label: 'Inline Text Link (Default)', value: 'default' },
+                { label: 'Button Merah (Primary)', value: 'primary' },
+                { label: 'Button Biru (Secondary)', value: 'secondary' },
+                { label: 'Button Kuning (Accent)', value: 'accent' },
+                { label: 'Button Hitam Outline', value: 'outline' },
+              ],
+            },
           ]
         },
       }),

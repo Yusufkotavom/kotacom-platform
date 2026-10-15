@@ -58,8 +58,18 @@ function extractHeadings(content: any): TocItem[] {
 
   if (Array.isArray(content)) {
     content.forEach((block) => {
-      // Check block fields like richText or generatedText
-      const blockContent = block?.fields?.richText || block?.fields?.generatedText || block?.richText
+      // Check block fields like richText, generatedText, or block-specific field objects like blogContentFields
+      const blockFields =
+        block?.blogContentFields ||
+        block?.contentFields ||
+        block?.aiContentFields ||
+        block?.fields ||
+        block
+      const blockContent =
+        blockFields?.richText ||
+        blockFields?.generatedText ||
+        blockFields?.content ||
+        block?.richText
       if (blockContent) {
         if (Array.isArray(blockContent)) blockContent.forEach(scanNode)
         else if (blockContent.root?.children) blockContent.root.children.forEach(scanNode)

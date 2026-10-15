@@ -57,6 +57,28 @@ export const jsxConverters: (args: { toc?: boolean }) => JSXConvertersFunction<N
       },
       link: ({ node, nodesToJSX }) => {
         const fields = node.fields
+        const appearance = fields?.appearance
+
+        if (appearance && appearance !== 'default') {
+          let variantStyle = 'bg-nb-red text-white hover:bg-nb-yellow hover:text-ink'
+          if (appearance === 'secondary') variantStyle = 'bg-nb-blue text-white hover:bg-nb-yellow hover:text-ink'
+          if (appearance === 'accent') variantStyle = 'bg-nb-yellow text-ink hover:bg-nb-red hover:text-white'
+          if (appearance === 'outline') variantStyle = 'bg-paper text-ink hover:bg-nb-yellow'
+
+          const btnClass = `inline-flex items-center justify-center font-display font-black uppercase tracking-wider text-xs sm:text-sm px-5 py-2.5 my-2 border-2 border-ink shadow-nb-sm active:translate-x-0.5 active:translate-y-0.5 transition-all no-underline ${variantStyle}`
+
+          return (
+            <CMSLink
+              className={btnClass}
+              newTab={Boolean(fields?.newTab)}
+              reference={fields.doc as Reference}
+              type={fields.linkType === 'internal' ? 'reference' : 'custom'}
+              url={fields.url}
+            >
+              {nodesToJSX({ nodes: node.children })}
+            </CMSLink>
+          )
+        }
 
         return (
           <CMSLink
