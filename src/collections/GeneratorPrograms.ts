@@ -122,7 +122,7 @@ export const GeneratorPrograms: CollectionConfig = {
         {
           name: 'outputStatus',
           type: 'select',
-          admin: { width: '50%' },
+          admin: { width: '34%' },
           defaultValue: 'draft',
           label: 'Output Status',
           options: [
@@ -131,11 +131,67 @@ export const GeneratorPrograms: CollectionConfig = {
           ],
         },
         {
+          name: 'runScope',
+          type: 'select',
+          admin: {
+            description: 'new_only = lewati baris yang sudah ada; failed_only = proses ulang yang gagal/warning/belum ada.',
+            width: '33%',
+          },
+          defaultValue: 'all',
+          label: 'Run Scope (Incremental)',
+          options: [
+            { label: 'All Rows (semua baris)', value: 'all' },
+            { label: 'New Only (hanya baris baru)', value: 'new_only' },
+            { label: 'Failed/Pending Only (ulangi yang gagal)', value: 'failed_only' },
+          ],
+        },
+        {
+          name: 'concurrency',
+          type: 'number',
+          admin: { description: 'Batas paralel request AI (1–8). Default: 4.', width: '33%' },
+          defaultValue: 4,
+          label: 'Concurrency (Workers)',
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
           name: 'maxRows',
           type: 'number',
           admin: { description: 'Batasi jumlah baris per run (0 = semua).', width: '50%' },
           defaultValue: 0,
           label: 'Max Rows',
+        },
+        {
+          name: 'enableInterlink',
+          type: 'checkbox',
+          admin: {
+            description: 'Sisipkan blok LinkGrid antarkota & sediakan token {{relatedLinks}} secara otomatis.',
+            width: '50%',
+          },
+          defaultValue: true,
+          label: 'Enable Interlinking',
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'interlinkHeading',
+          type: 'text',
+          admin: { width: '60%' },
+          defaultValue: 'Layanan Terkait di Kota Lain',
+          label: 'Interlink Heading',
+        },
+        {
+          name: 'interlinkCount',
+          type: 'number',
+          admin: { description: 'Jumlah tautan silang antarkota (default: 6).', width: '40%' },
+          defaultValue: 6,
+          label: 'Interlink Count',
         },
       ],
     },

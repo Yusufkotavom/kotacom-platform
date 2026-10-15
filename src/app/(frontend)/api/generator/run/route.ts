@@ -59,11 +59,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return json({ error: "`writeMode` harus salah satu: 'create' | 'overwrite'." }, 400)
   }
 
+  const concurrency = typeof body.concurrency === 'number' ? body.concurrency : undefined
+  const scope =
+    typeof body.scope === 'string' && ['all', 'new_only', 'failed_only'].includes(body.scope)
+      ? (body.scope as 'all' | 'failed_only' | 'new_only')
+      : undefined
+
   try {
     const result = await runProgram(payload, {
+      concurrency,
       maxRows: typeof body.maxRows === 'number' ? body.maxRows : undefined,
       mode: mode as 'dry' | 'generate' | 'off' | undefined,
       programId: programId as number | string,
+      scope,
       writeMode: writeMode as 'create' | 'overwrite' | undefined,
     })
     return json({ ok: true, ...result })

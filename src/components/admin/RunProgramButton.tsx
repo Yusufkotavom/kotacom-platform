@@ -9,6 +9,7 @@ export const RunProgramButton: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selectedScope, setSelectedScope] = useState<'all' | 'failed_only' | 'new_only'>('all')
 
   if (!id) {
     return (
@@ -19,14 +20,21 @@ export const RunProgramButton: React.FC = () => {
   }
 
   // 1. Eksekusi Generator (Full / Overwrite / Skip)
-  const handleRun = async (opts: { writeMode: 'create' | 'overwrite'; maxRows?: number; isSample?: boolean }) => {
+  const handleRun = async (opts: {
+    isSample?: boolean
+    maxRows?: number
+    scope?: 'all' | 'failed_only' | 'new_only'
+    writeMode: 'create' | 'overwrite'
+  }) => {
     const isSample = opts.isSample ?? false
     const targetWriteMode = opts.writeMode
+    const runScope = opts.scope ?? selectedScope
+
     const confirmMsg = isSample
       ? 'Jalankan 1 sampel baris pertama untuk uji coba? Dokumen sampel akan dibuat/diupdate.'
       : targetWriteMode === 'overwrite'
-        ? 'PERINGATAN: Generator akan menimpa/overwrite dokumen yang sudah ada dengan konten/template terbaru. Lanjutkan?'
-        : 'Generator akan dijalankan dalam mode create (dokumen yang sudah ada akan di-skip). Lanjutkan?'
+        ? `PERINGATAN: Generator akan menimpa/overwrite dokumen yang ada (Scope: ${runScope}). Lanjutkan?`
+        : `Generator akan dijalankan dalam mode create / skip existing (Scope: ${runScope}). Lanjutkan?`
 
     if (!window.confirm(confirmMsg)) return
 
@@ -43,6 +51,7 @@ export const RunProgramButton: React.FC = () => {
           mode: 'generate', // Selalu 'generate' agar bukan sekadar dry-run
           writeMode: targetWriteMode,
           maxRows: opts.maxRows,
+          scope: runScope,
         }),
       })
 
@@ -56,7 +65,7 @@ export const RunProgramButton: React.FC = () => {
       const sampleLink = sampleReport?.slug ? ` (Slug: /${sampleReport.slug})` : ''
 
       setResult(
-        `Sukses! Selesai dalam ${(data.durationMs / 1000).toFixed(1)}s. Total: ${total.rows ?? 0} baris (Dibuat: ${total.created ?? 0}, Diupdate: ${total.updated ?? 0}, Dilewati: ${total.skipped ?? 0}, Error: ${total.blocked ?? 0})${sampleLink}.`
+        `Sukses! (${(data.durationMs / 1000).toFixed(1)}s, ${total.concurrency ?? 4} workers, scope: ${total.scope ?? runScope}). Total diproses: ${total.rows ?? 0} dari ${total.totalDatasetRows ?? total.rows ?? 0} baris (Dibuat: ${total.created ?? 0}, Diupdate: ${total.updated ?? 0}, Dilewati: ${total.skipped ?? 0}, Error: ${total.blocked ?? 0})${sampleLink}.`
       )
     } catch (err: any) {
       setError(err?.message || 'Gagal menjalankan generator')
@@ -110,6 +119,30 @@ export const RunProgramButton: React.FC = () => {
       <p style={{ fontSize: '12px', color: '#555', marginBottom: '12px', lineHeight: '1.4' }}>
         Kelola eksekusi konten, uji coba sampel, atau bersihkan hasil generator program ini.
       </p>
+
+      {/* Selector Scope */}
+      <div style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#333' }}>
+          Target Scope (Incremental):
+        </label>
+        <select
+          value={selectedScope}
+          disabled={loading}
+          onChange={(e) => setSelectedScope(e.target.value as any)}
+          style={{
+            padding: '6px 8px',
+            border: '2px solid #121212',
+            fontSize: '11px',
+            fontWeight: 600,
+            background: '#fff',
+            cursor: 'pointer',
+          }}
+        >
+          <option value="all">Semua Baris (Full Batch)</option>
+          <option value="new_only">Hanya Baris Baru (Skip yg Sudah Ada)</option>
+          <option value="failed_only">Ulangi yang Gagal / Error Saja</option>
+        </select>
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {/* Tombol Preview 1 Sample */}

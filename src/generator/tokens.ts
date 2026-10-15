@@ -21,68 +21,112 @@ export const deepReplace = <T>(value: T, tokens: Record<string, string>): T => {
   return value
 }
 
-const clean = (value: unknown): string => (typeof value === 'string' ? value.trim() : '')
+export const clean = (value: unknown): string => {
+  if (value == null) return ''
+  if (typeof value === 'string') return value.trim()
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  return ''
+}
 
-const titleCase = (value: string): string =>
+export const titleCase = (value: string): string =>
   value
     .split(/\s+/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
 
+const toCamelCase = (str: string): string =>
+  str.replace(/[-_]([a-z0-9])/gi, (_match, char: string) => char.toUpperCase())
+
+const toSnakeCase = (str: string): string =>
+  str.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
+
 /**
- * Derive the token map for a row. Mirrors Sanity-clean's `buildGeneratorTokens`:
- * a set of derived (semantic) tokens + custom row tokens + optional
- * `tokenDefinitions` that restrict/rename which tokens are exposed.
+ * Derive the token map for a row.
+ *
+ * Mendukung fleksibilitas custom token tak terbatas:
+ * 1. Setiap kolom/field arbitrary di `row` (dari CSV/JSON) otomatis tersedia
+ *    sebagai token `{{key}}`, plus alias camelCase dan snake_case.
+ * 2. Token semantik default dinormalisasi (`location`, `label`, `secondaryKeywords`, dll).
+ * 3. Token runtime sistem (`year`, `month`).
+ * 4. Jika template memiliki `tokenDefinitions`, diaplikasikan sebagai override/fallback
+ *    tanpa membuang token kustom bawaan lainnya.
  */
 export const buildTokens = (
   template: Pick<GeneratorTemplateLite, 'tokenDefinitions'>,
   row: GeneratorRow,
 ): Record<string, string> => {
-  const primaryKeyword = clean(row.primaryKeyword)
-  // `secondaryKeywords` may arrive as a string (CSV column) or an array (JSON
-  // rows). Normalise both to a comma-joined string of trimmed values.
+  const source: Record<string, string> = {}
+
+  // 1. Ekstrak seluruh field arbitrary dari `row`
+  for (const [key, val] of Object.entries(row)) {
+    if (key === 'tokens' || key === 'key') continue
+    const cleaned = clean(val)
+    if (cleaned) {
+      source[key] = cleaned
+      source[toCamelCase(key)] = cleaned
+      source[toSnakeCase(key)] = cleaned
+    }
+  }
+
+  // 2. Normalisasi semantic tokens inti
+  const primaryKeyword = clean(row.primaryKeyword) || clean(source.primary_keyword) || clean(source.keyword) || ''
   const secondaryKeywords = (
     Array.isArray(row.secondaryKeywords)
       ? row.secondaryKeywords
       : typeof row.secondaryKeywords === 'string'
         ? row.secondaryKeywords.split(',')
-        : []
+        : typeof source.secondary_keywords === 'string'
+          ? source.secondary_keywords.split(',')
+          : []
   )
     .map(clean)
     .filter(Boolean)
     .join(', ')
-  const service = clean(row.service) || primaryKeyword
-  const city = clean(row.city)
+
+  const service = clean(row.service) || clean(source.layanan) || primaryKeyword
+  const city = clean(row.city) || clean(source.kota) || clean(source.kabupaten) || ''
   const location = city || service || 'target utama'
-  const offer = clean(row.offer) || `Konsultasi ${service}`
-  const industry = clean(row.industry) || 'bisnis lokal'
-  const localCondition = clean(row.localCondition)
+  const offer = clean(row.offer) || clean(source.penawaran) || `Konsultasi ${service}`
+  const industry = clean(row.industry) || clean(source.industri) || 'bisnis lokal'
+  const localCondition = clean(row.localCondition) || clean(source.kondisi_lokal) || ''
   const label = clean(row.label) || titleCase(service.replace(/-/g, ' '))
 
-  const source: Record<string, string> = {
-    primaryKeyword,
-    secondaryKeywords,
-    service,
-    city,
-    location,
-    offer,
-    industry,
-    localCondition,
-    label,
-  }
+  source.primaryKeyword = primaryKeyword
+  source.secondaryKeywords = secondaryKeywords
+  source.service = service
+  source.city = city
+  source.location = location
+  source.offer = offer
+  source.industry = industry
+  source.localCondition = localCondition
+  source.label = label
 
+  // 3. Custom row.tokens array (legacy format)
   for (const token of row.tokens ?? []) {
-    if (token?.name && token.values?.length) source[token.name] = clean(token.values[0])
+    if (token?.name && token.values?.length) {
+      source[token.name] = clean(token.values[0])
+    }
   }
 
+  // 4. Token runtime sistem
+  const now = new Date()
+  source.year = String(now.getFullYear())
+  const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+  source.month = MONTHS[now.getMonth()] || ''
+
+  // 5. Template tokenDefinitions (override / fallback tanpa membuang token lain)
   const definitions = template.tokenDefinitions ?? []
   if (!definitions.length) return source
 
-  return definitions.reduce<Record<string, string>>((acc, def) => {
+  const result: Record<string, string> = { ...source }
+  for (const def of definitions) {
     const fromSource = def.sourceField ? clean(source[def.sourceField]) : ''
-    const resolved = fromSource || clean(def.fallbackValue)
-    if (resolved) acc[def.name] = resolved
-    return acc
-  }, {})
+    const fallback = clean(def.fallbackValue)
+    if (fromSource || fallback) {
+      result[def.name] = fromSource || fallback
+    }
+  }
+
+  return result
 }

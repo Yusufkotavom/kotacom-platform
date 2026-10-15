@@ -20,6 +20,7 @@ export type GeneratorRow = {
   secondaryKeywords?: null | string | string[]
   service?: null | string
   tokens?: GeneratorRowToken[] | null
+  [customField: string]: unknown
 }
 
 export type GeneratorTemplateLite = {
@@ -38,14 +39,19 @@ export type GeneratorTemplateLite = {
 
 export type GeneratorProgramLite = {
   aiMode?: 'dry' | 'generate' | 'off' | null
+  concurrency?: null | number
   dataset?: null | number | string
   defaultAuthors?: null | (number | string)[]
   defaultCategory?: null | number | string
   defaultImage?: null | number | string
+  enableInterlink?: boolean | null
   entityType: EntityType
   id: number | string
+  interlinkCount?: null | number
+  interlinkHeading?: null | string
   outputStatus?: 'draft' | 'published' | null
   routeBase?: null | string
+  runScope?: 'all' | 'failed_only' | 'new_only' | null
   writeMode?: 'create' | 'overwrite' | null
 }
 

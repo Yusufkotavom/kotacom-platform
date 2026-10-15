@@ -1,14 +1,20 @@
 import type { BasePayload } from 'payload'
 
-import { buildStructurePrompt, generateLightPlan, generatePlan, normalizePlan } from './plan'
-import { extractJson } from './plan'
 import { aiConfigured, aiInfo, extractAiPrompts, replacePromptsIn } from './ai'
-import { buildDraft } from './render'
-import { enrichAiBlocks } from './enrich'
-import { assessDraft } from './qa'
-import { buildTokens } from './tokens'
-import { findDuplicate } from './dedupe'
 import type { ContentPlan } from './blocks'
+import { findDuplicate } from './dedupe'
+import { enrichAiBlocks } from './enrich'
+import {
+  buildInterlinkCatalog,
+  selectInterlinks,
+  type InterlinkResult,
+  type InterlinkTarget,
+} from './interlink'
+import { buildStructurePrompt, extractJson, generateLightPlan, generatePlan, normalizePlan } from './plan'
+import { assessDraft } from './qa'
+import { buildDraft } from './render'
+import { buildGeneratorSlug } from './slug'
+import { buildTokens } from './tokens'
 import type {
   EntityType,
   ExistingDoc,
@@ -20,11 +26,15 @@ import type {
 } from './types'
 
 export type RunOptions = {
-  /** Force a mode regardless of the program's own setting. */
-  mode?: 'dry' | 'generate' | 'off'
+  /** Batas paralel worker (1-8). Default dari program atau 4. */
+  concurrency?: number
   /** Hard cap on rows processed in this call. */
   maxRows?: number
+  /** Force a mode regardless of the program's own setting. */
+  mode?: 'dry' | 'generate' | 'off'
   programId: number | string
+  /** Scope eksekusi: 'all' (semua), 'new_only' (hanya belum ada doc), 'failed_only' (ulangi yang gagal). */
+  scope?: 'all' | 'failed_only' | 'new_only'
   /** Override program writeMode ('create' = skip existing, 'overwrite' = update existing). */
   writeMode?: 'create' | 'overwrite'
 }
@@ -51,10 +61,13 @@ export type RunResult = {
   runId: string
   totals: {
     blocked: number
+    concurrency: number
     created: number
     ready: number
     rows: number
+    scope: string
     skipped: number
+    totalDatasetRows: number
     updated: number
     warning: number
   }
@@ -101,16 +114,21 @@ const relIds = (value: unknown): number | string | undefined => {
 
 const loadProgram = (doc: AnyObj): GeneratorProgramLite => ({
   aiMode: (doc.aiMode as GeneratorProgramLite['aiMode']) ?? 'off',
+  concurrency: typeof doc.concurrency === 'number' ? doc.concurrency : null,
   defaultAuthors: ((doc.defaultAuthors as unknown[]) ?? []).map(relIds).filter(Boolean) as (
     | number
     | string
   )[],
   defaultCategory: relIds(doc.defaultCategory),
   defaultImage: relIds(doc.defaultImage),
+  enableInterlink: doc.enableInterlink !== false,
   entityType: doc.entityType as EntityType,
   id: doc.id as number | string,
+  interlinkCount: typeof doc.interlinkCount === 'number' ? doc.interlinkCount : 6,
+  interlinkHeading: (doc.interlinkHeading as string) ?? 'Layanan Terkait di Kota Lain',
   outputStatus: (doc.outputStatus as 'draft' | 'published') ?? 'draft',
   routeBase: (doc.routeBase as string) ?? null,
+  runScope: (doc.runScope as GeneratorProgramLite['runScope']) ?? 'all',
   writeMode: (doc.writeMode as 'create' | 'overwrite') ?? 'overwrite',
 })
 
@@ -197,12 +215,11 @@ const buildBlocks = async (input: {
 /**
  * Execute a generator program.
  *
- * Modes:
- *  - `dry`      → build drafts + run QA, write nothing.
- *  - `generate` → build drafts, fill AI blocks, then write docs (draft/published
- *                 per program.outputStatus). `writeMode:'overwrite'` updates the
- *                 existing doc (stable id); `'create'` skips slugs that exist.
- *  - `off`      → deterministic, no AI call at all.
+ * Mendukung:
+ *  - Worker concurrency queue (configurable)
+ *  - Arbitrary custom tokens
+ *  - Incremental Run / Delta update (new_only, failed_only)
+ *  - Safe Interlinking network (mesh ring + cluster)
  */
 export const runProgram = async (
   payload: BasePayload,
@@ -238,6 +255,7 @@ export const runProgram = async (
   const writeMode = options.writeMode ?? program.writeMode ?? 'overwrite'
   const maxRows = options.maxRows ?? Number(programDoc.maxRows ?? 0)
   const exclude = new Set<string>((programDoc.excludeRowKeys as string[]) ?? [])
+  const scope = options.scope ?? program.runScope ?? 'all'
 
   const datasetIds = ((programDoc.datasets as unknown[]) ?? []).map(relIds).filter(Boolean)
   const datasetDocs = (await Promise.all(
@@ -251,23 +269,114 @@ export const runProgram = async (
     ),
   )) as unknown as AnyObj[]
 
-  let rows = asRows(datasetDocs).filter((row) => row.key && !exclude.has(row.key))
-  if (maxRows > 0) rows = rows.slice(0, maxRows)
+  // Ambil semua baris valid dari dataset
+  const allDatasetRows = asRows(datasetDocs).filter((row) => row.key && !exclude.has(row.key))
+  const totalDatasetRows = allDatasetRows.length
 
   const existing = await loadExisting(payload, entityType, program.id)
 
-  const report: RowReport[] = []
+  // 1. Safe Interlinking Catalog:
+  // Bangun katalog interlink dari seluruh baris dataset program agar halaman yang di-generate
+  // (termasuk delta) selalu dapat menautkan ke sesama cluster secara konsisten & aman.
+  const interlinkTargets: InterlinkTarget[] =
+    program.enableInterlink !== false
+      ? buildInterlinkCatalog(allDatasetRows, template, program)
+      : []
+
+  // 2. Incremental / Delta Run Filtering
+  let targetRows = [...allDatasetRows]
+
+  if (scope === 'new_only') {
+    const existingKeys = new Set(
+      existing.map((e) => e.generator?.rowKey).filter(Boolean) as string[],
+    )
+    const existingSlugs = new Set(existing.map((e) => e.slug).filter(Boolean))
+
+    targetRows = targetRows.filter((row) => {
+      if (row.key && existingKeys.has(row.key)) return false
+      const expectedSlug = buildGeneratorSlug({
+        city: row.city,
+        primaryKeyword: row.primaryKeyword,
+        routeBase: program.routeBase || template.routeBase,
+        service: row.service,
+        slugPattern: template.slugPattern,
+      })
+      if (existingSlugs.has(expectedSlug)) return false
+      return true
+    })
+  } else if (scope === 'failed_only') {
+    try {
+      const lastRun = await payload.find({
+        collection: 'generator-runs',
+        depth: 0,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-createdAt',
+        where: { program: { equals: program.id } },
+      })
+      const lastReport = ((lastRun.docs[0] as unknown as AnyObj)?.report as RowReport[]) ?? []
+      const rerunKeys = new Set(
+        lastReport
+          .filter(
+            (r) =>
+              r.action === 'skipped' ||
+              r.severity === 'blocked' ||
+              r.severity === 'warning',
+          )
+          .map((r) => r.key),
+      )
+      const existingKeys = new Set(
+        existing.map((e) => e.generator?.rowKey).filter(Boolean) as string[],
+      )
+      targetRows = targetRows.filter((row) => {
+        if (row.key && rerunKeys.has(row.key)) return true
+        if (row.key && !existingKeys.has(row.key)) return true
+        return false
+      })
+    } catch {
+      // Fallback bila run history kosong: proses seluruh baris
+    }
+  }
+
+  if (maxRows > 0) targetRows = targetRows.slice(0, maxRows)
+
   const aiNeeded = mode === 'generate'
   const collection = entityType === 'post' ? 'posts' : 'pages'
-  // With a template skeleton the AI only needs title/meta/hero (light plan);
-  // without one the full plan is required to synthesise the blocks.
   const light = (template.layout ?? []).length > 0
-  const poolSize = Math.max(1, Math.min(Number(process.env.GENERATOR_CONCURRENCY ?? 6), 8))
 
-  const processRow = async (row: GeneratorRow): Promise<RowReport> => {
+  // 3. Concurrency worker queue setup (configurable per program / options)
+  const poolSize = Math.max(
+    1,
+    Math.min(
+      Number(
+        options.concurrency ??
+          program.concurrency ??
+          process.env.GENERATOR_CONCURRENCY ??
+          4,
+      ),
+      8,
+    ),
+  )
+
+  const processRow = async (row: GeneratorRow, rowIdx: number): Promise<RowReport> => {
     const tokens = buildTokens(template, row)
 
-    // 1) Optional content plan (drives fallback blocks + title/meta).
+    // A. Interlinking resolution untuk baris ini
+    let interlink: InterlinkResult | null = null
+    if (program.enableInterlink !== false && interlinkTargets.length > 1) {
+      // Cari index baris ini di katalog target interlink
+      const catalogIdx = interlinkTargets.findIndex(
+        (t) => t.key === row.key || (row.city && t.city === row.city),
+      )
+      interlink = selectInterlinks({
+        allTargets: interlinkTargets,
+        count: program.interlinkCount ?? 6,
+        currentIndex: catalogIdx >= 0 ? catalogIdx : rowIdx,
+        currentRow: row,
+      })
+    }
+
+    // B. AI Content Plan
     let plan: ContentPlan | null = null
     if (aiNeeded && aiConfigured()) {
       for (let attempt = 0; attempt < 2 && !plan; attempt += 1) {
@@ -277,7 +386,9 @@ export const runProgram = async (
             : await generatePlan({ entityType, row, template, tokens })
         } catch (err) {
           if (attempt === 1) {
-            payload.logger.warn(`[generator] plan gagal utk baris ${row.key}: ${(err as Error)?.message}`)
+            payload.logger.warn(
+              `[generator] plan gagal utk baris ${row.key}: ${(err as Error)?.message}`,
+            )
           }
           plan = null
         }
@@ -285,10 +396,17 @@ export const runProgram = async (
       }
     }
 
-    // 2) Assemble the draft from the template skeleton (or plan fallback).
-    let draft = buildDraft({ entityType, plan, program, row, template })
+    // C. Assemble draft with custom tokens & interlinks
+    let draft = buildDraft({
+      entityType,
+      interlink,
+      plan,
+      program,
+      row,
+      template,
+    })
 
-    // 3) Resolve any `[aigen:…]` shortcodes left in the skeleton.
+    // D. Resolve [aigen:...] shortcodes
     if (aiNeeded) {
       const prompts = extractAiPrompts(draft)
       if (prompts.length) {
@@ -298,17 +416,18 @@ export const runProgram = async (
       }
     }
 
-    // 4) Enrich `aiContent` blocks.
+    // E. Enrich aiContent blocks
     const built = await buildBlocks({ draft, entityType, mode, row, template })
     draft = built.draft
 
-    // 5) QA gate (duplicate + SEO + completeness).
+    // F. QA Gate
     const qa = assessDraft({ draft, existing, overwrite: writeMode === 'overwrite' })
 
     const entry: RowReport = {
       action: 'dry-run',
-      entityType,
+      docId: undefined,
       enriched: built.enriched,
+      entityType,
       issues: qa.issues,
       key: row.key as string,
       severity: qa.severity,
@@ -318,7 +437,7 @@ export const runProgram = async (
 
     if (mode !== 'generate' || qa.severity === 'blocked') return entry
 
-    // 6) Write.
+    // G. Write to DB
     const dupMatch = findDuplicate({
       existing,
       keywordKey: draft.keywordKey,
@@ -362,27 +481,34 @@ export const runProgram = async (
     return entry
   }
 
-  // Bounded worker pool: AI enrichment is network-bound, so a few concurrent
-  // rows cut a bulk run from hours to minutes. Row errors are caught inside
-  // processRow, so a rejection here would be unexpected and is left to surface.
+  // Bounded worker pool dengan urutan hasil yang dipertahankan
+  const results: (RowReport | null)[] = new Array(targetRows.length).fill(null)
   let cursor = 0
   const worker = async (): Promise<void> => {
-    while (cursor < rows.length) {
+    while (cursor < targetRows.length) {
       const idx = cursor
       cursor += 1
-      const row = rows[idx]
+      const row = targetRows[idx]
       if (!row) break
-      report.push(await processRow(row))
+      results[idx] = await processRow(row, idx)
     }
   }
-  await Promise.all(Array.from({ length: Math.min(poolSize, rows.length || 1) }, worker))
+
+  await Promise.all(
+    Array.from({ length: Math.min(poolSize, targetRows.length || 1) }, worker),
+  )
+
+  const report: RowReport[] = results.filter((r): r is RowReport => r !== null)
 
   const totals = {
     blocked: report.filter((r) => r.severity === 'blocked').length,
+    concurrency: poolSize,
     created: report.filter((r) => r.action === 'created').length,
     ready: report.filter((r) => r.severity === 'ready').length,
     rows: report.length,
+    scope,
     skipped: report.filter((r) => r.action === 'skipped').length,
+    totalDatasetRows,
     updated: report.filter((r) => r.action === 'updated').length,
     warning: report.filter((r) => r.severity === 'warning').length,
   }
@@ -399,7 +525,7 @@ export const runProgram = async (
     writeMode,
   }
 
-  // Persist the run report (best-effort — never fail the run on audit failure).
+  // Persist run report
   try {
     await payload.create({
       collection: 'generator-runs',
@@ -408,7 +534,7 @@ export const runProgram = async (
         entityType,
         finishedAt: new Date().toISOString(),
         mode,
-        notes: `AI configured: ${result.ai.configured}`,
+        notes: `AI configured: ${result.ai.configured} | Concurrency: ${poolSize} | Scope: ${scope}`,
         program: program.id as never,
         report: report as never,
         runId,
@@ -421,12 +547,16 @@ export const runProgram = async (
     })
     await payload.update({
       collection: 'generator-programs',
-      data: { lastRunAt: new Date().toISOString(), lastRunSummary: totals as never, status: 'done' },
+      data: {
+        lastRunAt: new Date().toISOString(),
+        lastRunSummary: totals as never,
+        status: 'done',
+      },
       id: program.id as number | string,
       overrideAccess: true,
     })
   } catch {
-    // audit write is non-critical
+    // non-critical
   }
 
   return result

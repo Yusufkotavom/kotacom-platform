@@ -1,6 +1,7 @@
 import { normalizeSeoDescription, normalizeSeoTitle } from '@root/seo/normalize'
 
 import { planToBlocks, type ContentPlan } from './blocks'
+import { buildInterlinkBlock, type InterlinkResult } from './interlink'
 import { lexicalFromText } from './lexical'
 import { buildGeneratorSlug } from './slug'
 import { buildTokens, deepReplace } from './tokens'
@@ -11,6 +12,7 @@ export const GENERATOR_VERSION = 'v2'
 export type BuildDraftInput = {
   entityType: 'page' | 'post'
   generatedAt?: string
+  interlink?: InterlinkResult | null
   plan?: ContentPlan | null
   program: GeneratorProgramLite
   row: GeneratorRow
@@ -25,9 +27,21 @@ export type BuildDraftInput = {
  * draft is always valid and inspectable.
  */
 export const buildDraft = (input: BuildDraftInput): GeneratedDraft => {
-  const { entityType, plan, program, row, template } = input
+  const { entityType, interlink, plan, program, row, template } = input
   const generatedAt = input.generatedAt ?? new Date().toISOString()
-  const tokens = buildTokens(template, row)
+  const baseTokens = buildTokens(template, row)
+
+  // Suntikkan token interlink jika tersedia
+  const tokens: Record<string, string> = {
+    ...baseTokens,
+    ...(interlink
+      ? {
+          relatedCities: interlink.citiesList,
+          relatedLinks: interlink.html,
+          relatedLinksMarkdown: interlink.markdown,
+        }
+      : {}),
+  }
 
   const slug = buildGeneratorSlug({
     city: row.city,
@@ -55,11 +69,38 @@ export const buildDraft = (input: BuildDraftInput): GeneratedDraft => {
   // `aiContent` blocks already enriched by the runner); otherwise fall back to
   // the AI content plan expanded into native blocks.
   const templateBlocks = (template.layout ?? []) as Record<string, unknown>[]
-  const blocks: Record<string, unknown>[] = templateBlocks.length
+  let blocks: Record<string, unknown>[] = templateBlocks.length
     ? (deepReplace(templateBlocks, tokens) as Record<string, unknown>[])
     : plan
       ? planToBlocks(plan, entityType)
       : []
+
+  // Safe Interlinking Block: sisipkan blok linkGrid sebelum CTA penutup atau di akhir layout
+  if (
+    program.enableInterlink !== false &&
+    interlink &&
+    interlink.links.length > 0 &&
+    entityType === 'page'
+  ) {
+    const interlinkBlock = buildInterlinkBlock({
+      heading: program.interlinkHeading || 'Layanan Terkait di Kota Lain',
+      links: interlink.links,
+    })
+
+    // Cari letak sebelum cta / whatsappCta, jika ada
+    const ctaIndex = blocks.findIndex(
+      (b) => b.blockType === 'cta' || b.blockType === 'whatsappCta',
+    )
+    if (ctaIndex !== -1) {
+      blocks = [
+        ...blocks.slice(0, ctaIndex),
+        interlinkBlock,
+        ...blocks.slice(ctaIndex),
+      ]
+    } else {
+      blocks.push(interlinkBlock)
+    }
+  }
 
   const aiUsed =
     Boolean(plan) ||
