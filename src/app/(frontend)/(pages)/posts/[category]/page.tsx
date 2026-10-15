@@ -87,9 +87,7 @@ const PostsSegment = async ({
   }
 
   // 2. otherwise treat the segment as a flat post slug (canonical permalink)
-  const post = draft
-    ? await fetchPostBySlug(category)
-    : await unstable_cache(fetchPostBySlug, [`post-${category}`], { revalidate: 300 })(category)
+  const post = await fetchPostBySlug(category)
 
   if (!post) {
     notFound()

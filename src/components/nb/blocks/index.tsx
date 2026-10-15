@@ -906,7 +906,7 @@ function fieldsOf(block: any): any {
 export function BauhausBlock({ block }: { block: any }) {
   const fields = fieldsOf(block)
   const Renderer = RENDERERS[block?.blockType] || GenericBlock
-  return <Renderer fields={fields} />
+  return <Renderer fields={fields} id={block?.id} />
 }
 
 export function BauhausBlocks({ blocks }: { blocks?: any[] | null }) {
