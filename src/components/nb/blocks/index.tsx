@@ -2,6 +2,8 @@ import * as React from 'react'
 import { RichText } from '@components/RichText/index'
 import { cn } from '@root/utilities/cn'
 import { LinkButton } from '../Button'
+import { BauhausSlider } from '../Slider'
+import { BauhausUniversalCards } from '../UniversalCards'
 import { Card, NumBadge } from '../Card'
 import { Pill } from '../Pill'
 import { Section, SectionTag } from '../Section'
@@ -601,34 +603,7 @@ function SliderBlock({ fields, id }: { fields: any; id?: string }) {
   if (slides.length === 0 && !introContent) return null
   return (
     <Section bg="canvas" id={id}>
-      {introContent ? (
-        <div className="mb-8 max-w-3xl">
-          <RichText content={introContent} />
-        </div>
-      ) : null}
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {slides.map((s: any, i: number) => (
-          <Card key={s.id || i} cornerShape="circle" cornerTone="yellow" className="p-7">
-            <NumBadge n={String(i + 1).padStart(2, '0')} />
-            {s.quote ? (
-              <blockquote className="mt-4 font-medium italic leading-relaxed">
-                “{s.quote}”
-              </blockquote>
-            ) : null}
-            {s.richText ? (
-              <div className="mt-4">
-                <RichText content={s.richText} />
-              </div>
-            ) : null}
-            {s.author ? (
-              <p className="mt-5 font-mono text-xs font-bold uppercase tracking-wider text-ink/80">
-                {s.author}
-                {s.role ? `, ${s.role}` : ''}
-              </p>
-            ) : null}
-          </Card>
-        ))}
-      </div>
+      <BauhausSlider slides={slides} introContent={introContent} id={id} />
     </Section>
   )
 }
@@ -813,64 +788,17 @@ function ExampleTabsBlock({ fields, id }: { fields: any; id?: string }) {
 }
 
 function CaseStudyCardsBlock({ fields, id }: { fields: any; id?: string }) {
-  const { cards } = fields || {}
-  const cardList = Array.isArray(cards) ? cards : []
   return (
     <Section bg="canvas" id={id}>
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {cardList.map((c: any, i: number) => {
-          const cs = typeof c.caseStudy === 'object' ? c.caseStudy : null
-          const title = cs?.title || `Studi Kasus ${i + 1}`
-          const excerpt = cs?.excerpt || ''
-          const url = cs?.slug ? `/case-studies/${cs.slug}` : '/case-studies'
-          return (
-            <Card key={c.id || i} cornerShape="square" cornerTone="blue" className="p-7">
-              <h3 className="text-xl uppercase tracking-tight">{title}</h3>
-              {c.richText ? (
-                <div className="mt-3">
-                  <RichText content={c.richText} />
-                </div>
-              ) : excerpt ? (
-                <p className="mt-3 font-medium leading-relaxed">{excerpt}</p>
-              ) : null}
-              <LinkButton href={url} variant="outline" size="sm" className="mt-5">
-                Baca Studi Kasus →
-              </LinkButton>
-            </Card>
-          )
-        })}
-      </div>
+      <BauhausUniversalCards fields={fields} id={id} variant="cards" />
     </Section>
   )
 }
 
 function CaseStudiesHighlightBlock({ fields, id }: { fields: any; id?: string }) {
-  const { richText, caseStudies } = fields || {}
-  const list = Array.isArray(caseStudies) ? caseStudies : []
   return (
     <Section bg="canvas" id={id}>
-      {richText ? (
-        <div className="mb-8 max-w-3xl">
-          <RichText content={richText} />
-        </div>
-      ) : null}
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((cs: any, i: number) => {
-          const item = typeof cs === 'object' ? cs : null
-          const title = item?.title || `Highlight Studi Kasus ${i + 1}`
-          const excerpt = item?.excerpt || ''
-          const url = item?.slug ? `/case-studies/${item.slug}` : '/case-studies'
-          return (
-            <Card key={item?.id || i} cornerShape="triangle" cornerTone="red" className="p-7">
-              <h3 className="text-xl uppercase tracking-tight">{title}</h3>
-              {excerpt ? <p className="mt-3 font-medium leading-relaxed">{excerpt}</p> : null}
-              <LinkButton href={url} variant="primary" size="sm" className="mt-5">
-                Eksplor Proyek →
-              </LinkButton>
-            </Card>
-          )
-        })}
-      </div>
+      <BauhausUniversalCards fields={fields} id={id} variant="highlight" />
     </Section>
   )
 }
