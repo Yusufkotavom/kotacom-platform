@@ -487,14 +487,14 @@ async function main() {
       await payload.update({
         collection: 'pages',
         id: existing.docs[0].id,
-        data: page,
+        data: page as any,
         draft: true,
       })
     } else {
       console.log(`[Page] Creating new draft: ${page.title}`)
       await payload.create({
         collection: 'pages',
-        data: page,
+        data: page as any,
         draft: true,
       })
     }
