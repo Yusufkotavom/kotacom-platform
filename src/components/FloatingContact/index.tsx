@@ -2,28 +2,10 @@
 
 import React from 'react'
 
-/**
- * FloatingContact — site-wide floating action buttons pinned to the bottom-right
- * corner on every page. Two round buttons in the Bauhaus style:
- *   • WhatsApp (brand green #25D366)
- *   • Call (Bauhaus red)
- *
- * Both use the canonical Kotacom contact number so the component needs no DB
- * access and works with the force-dynamic / no-database build. Styling follows
- * the Bauhaus tokens: stark ink border, hard offset shadow (no blur) and the
- * mechanical `.press` interaction from globals.css.
- */
-
-// Canonical WhatsApp number for the whole site (see SiteSettings default).
-const WA_NUMBER = '6285799520350'
-// Same line, formatted for the tel: scheme.
-const TEL_NUMBER = '+6285799520350'
-
-const WA_TEXT = encodeURIComponent(
-  'Halo Kotacom, saya ingin konsultasi mengenai layanan Anda.',
-)
-const WA_HREF = `https://wa.me/${WA_NUMBER}?text=${WA_TEXT}`
-const TEL_HREF = `tel:${TEL_NUMBER}`
+export interface FloatingContactProps {
+  whatsappNumber?: string
+  phone?: string
+}
 
 const WhatsAppGlyph: React.FC = () => (
   <svg
@@ -51,33 +33,41 @@ const PhoneGlyph: React.FC = () => (
   </svg>
 )
 
-export const FloatingContact: React.FC = () => {
+export const FloatingContact: React.FC<FloatingContactProps> = ({ whatsappNumber, phone }) => {
+  if (!whatsappNumber && !phone) return null
+
+  const cleanWa = whatsappNumber ? whatsappNumber.replace(/[^0-9]/g, '') : ''
+  const waHref = cleanWa ? `https://wa.me/${cleanWa}` : undefined
+  const telHref = phone ? `tel:${phone.replace(/[^0-9+]/g, '')}` : undefined
+
   return (
     <div
       aria-label="Kontak cepat"
       className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6"
       role="group"
     >
-      {/* Call — Bauhaus red */}
-      <a
-        aria-label="Telepon Kotacom sekarang"
-        className="press flex h-14 w-14 items-center justify-center rounded-full border-4 border-ink bg-nb-red text-paper shadow-nb-sm"
-        href={TEL_HREF}
-      >
-        <PhoneGlyph />
-      </a>
+      {telHref ? (
+        <a
+          aria-label="Telepon sekarang"
+          className="press flex h-14 w-14 items-center justify-center rounded-full border-4 border-ink bg-nb-red text-paper shadow-nb-sm"
+          href={telHref}
+        >
+          <PhoneGlyph />
+        </a>
+      ) : null}
 
-      {/* WhatsApp — brand green */}
-      <a
-        aria-label="Chat dengan Kotacom via WhatsApp"
-        className="press flex h-14 w-14 items-center justify-center rounded-full border-4 border-ink text-paper shadow-nb-sm"
-        href={WA_HREF}
-        rel="noopener noreferrer"
-        style={{ backgroundColor: '#25D366' }}
-        target="_blank"
-      >
-        <WhatsAppGlyph />
-      </a>
+      {waHref ? (
+        <a
+          aria-label="Chat WhatsApp"
+          className="press flex h-14 w-14 items-center justify-center rounded-full border-4 border-ink text-paper shadow-nb-sm"
+          href={waHref}
+          rel="noopener noreferrer"
+          style={{ backgroundColor: '#25D366' }}
+          target="_blank"
+        >
+          <WhatsAppGlyph />
+        </a>
+      ) : null}
     </div>
   )
 }

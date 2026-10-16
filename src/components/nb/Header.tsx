@@ -42,8 +42,15 @@ const FALLBACK: NavItem[] = [
   { label: 'Blog', href: '/posts' },
 ]
 
+export interface HeaderProps {
+  items?: NavItem[]
+  whatsapp?: string
+  businessName?: string
+  menuCta?: { label: string; href: string }
+}
+
 /** Geometric Bauhaus wordmark: circle + rotated square + triangle. */
-export function Logo({ className }: { className?: string }) {
+export function Logo({ className, name }: { className?: string; name?: string }) {
   return (
     <span className={['inline-flex items-center gap-2', className].filter(Boolean).join(' ')}>
       <span className="inline-flex items-center">
@@ -51,18 +58,19 @@ export function Logo({ className }: { className?: string }) {
         <span className="-ml-1 block h-6 w-6 rotate-45 border-2 border-ink bg-nb-blue" />
         <span className="tri -ml-1 block h-5 w-5 border-2 border-ink bg-nb-yellow" />
       </span>
-      <span className="text-xl font-black uppercase tracking-tight">Kotacom</span>
+      {name ? (
+        <span className="text-xl font-black uppercase tracking-tight">{name}</span>
+      ) : null}
     </span>
   )
 }
 
 export function Header({
-  items = FALLBACK,
-  whatsapp = WHATSAPP_HREF,
-}: {
-  items?: NavItem[]
-  whatsapp?: string
-}) {
+  items = [],
+  whatsapp,
+  businessName,
+  menuCta,
+}: HeaderProps) {
   const [open, setOpen] = React.useState(false)
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null)
   const [mobileExpanded, setMobileExpanded] = React.useState<Record<string, boolean>>({})
@@ -74,91 +82,104 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 border-b-4 border-ink bg-canvas">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
-        <Link href="/" aria-label="Kotacom — beranda">
-          <Logo />
+        <Link href="/" aria-label={businessName ? `${businessName} — beranda` : 'Beranda'}>
+          <Logo name={businessName} />
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
-          {items.map((it) => {
-            const hasChildren = Array.isArray(it.children) && it.children.length > 0
-            if (hasChildren) {
-              const isOpen = activeDropdown === it.label
-              return (
-                <div
-                  key={it.label}
-                  className="relative"
-                  onMouseEnter={() => setActiveDropdown(it.label)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setActiveDropdown(isOpen ? null : it.label)}
-                    className="flex items-center gap-1 py-2 text-sm font-bold uppercase tracking-wide hover:text-nb-red"
+        {items.length > 0 ? (
+          <nav className="hidden items-center gap-6 lg:flex">
+            {items.map((it) => {
+              const hasChildren = Array.isArray(it.children) && it.children.length > 0
+              if (hasChildren) {
+                const isOpen = activeDropdown === it.label
+                return (
+                  <div
+                    key={it.label}
+                    className="relative"
+                    onMouseEnter={() => setActiveDropdown(it.label)}
+                    onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    {it.label}
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
-                    />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveDropdown(isOpen ? null : it.label)}
+                      className="flex items-center gap-1 py-2 text-sm font-bold uppercase tracking-wide hover:text-nb-red"
+                    >
+                      {it.label}
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
 
-                  {isOpen ? (
-                    <div className="absolute left-0 top-full pt-1">
-                      <div className="w-64 border-4 border-ink bg-paper p-2 shadow-nb-lg">
-                        {it.children!.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            onClick={() => setActiveDropdown(null)}
-                            className="block border-b-2 border-transparent p-2.5 transition-colors hover:border-ink hover:bg-canvas"
-                          >
-                            <span className="block text-xs font-black uppercase tracking-wide text-ink hover:text-nb-red">
-                              {child.label}
-                            </span>
-                            {child.description ? (
-                              <span className="mt-0.5 block font-mono text-[10px] text-ink/70">
-                                {child.description}
+                    {isOpen ? (
+                      <div className="absolute left-0 top-full pt-1">
+                        <div className="w-64 border-4 border-ink bg-paper p-2 shadow-nb-lg">
+                          {it.children!.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setActiveDropdown(null)}
+                              className="block border-b-2 border-transparent p-2.5 transition-colors hover:border-ink hover:bg-canvas"
+                            >
+                              <span className="block text-xs font-black uppercase tracking-wide text-ink hover:text-nb-red">
+                                {child.label}
                               </span>
-                            ) : null}
-                          </Link>
-                        ))}
+                              {child.description ? (
+                                <span className="mt-0.5 block font-mono text-[10px] text-ink/70">
+                                  {child.description}
+                                </span>
+                              ) : null}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
-                </div>
+                    ) : null}
+                  </div>
+                )
+              }
+
+              return (
+                <Link
+                  key={it.href || it.label}
+                  href={it.href || '#'}
+                  className="py-2 text-sm font-bold uppercase tracking-wide hover:text-nb-red"
+                >
+                  {it.label}
+                </Link>
               )
-            }
+            })}
+          </nav>
+        ) : null}
 
-            return (
-              <Link
-                key={it.href || it.label}
-                href={it.href || '#'}
-                className="py-2 text-sm font-bold uppercase tracking-wide hover:text-nb-red"
-              >
-                {it.label}
-              </Link>
-            )
-          })}
-        </nav>
+        {menuCta ? (
+          <div className="hidden lg:block">
+            <LinkButton href={menuCta.href} variant="primary" size="sm">
+              {menuCta.label}
+              <span className="font-black">&rarr;</span>
+            </LinkButton>
+          </div>
+        ) : whatsapp ? (
+          <div className="hidden lg:block">
+            <LinkButton href={whatsapp} variant="primary" size="sm">
+              Konsultasi
+              <span className="font-black">&rarr;</span>
+            </LinkButton>
+          </div>
+        ) : null}
 
-        <div className="hidden lg:block">
-          <LinkButton href={whatsapp} variant="primary" size="sm">
-            Konsultasi
-            <span className="font-black">&rarr;</span>
-          </LinkButton>
-        </div>
-
-        <button
-          type="button"
-          aria-label={open ? 'Tutup menu' : 'Buka menu'}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper shadow-nb-sm lg:hidden"
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {items.length > 0 || menuCta || whatsapp ? (
+          <button
+            type="button"
+            aria-label={open ? 'Tutup menu' : 'Buka menu'}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper shadow-nb-sm lg:hidden"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        ) : null}
       </div>
 
-      {open ? (
+      {open && (items.length > 0 || menuCta || whatsapp) ? (
         <div className="border-t-4 border-ink bg-paper lg:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col px-4 py-2 sm:px-6">
             {items.map((it) => {
@@ -211,9 +232,16 @@ export function Header({
                 </Link>
               )
             })}
-            <LinkButton href={whatsapp} variant="primary" size="md" className="my-3">
-              Konsultasi <span className="font-black">&rarr;</span>
-            </LinkButton>
+
+            {menuCta ? (
+              <LinkButton href={menuCta.href} variant="primary" size="md" className="my-3">
+                {menuCta.label} <span className="font-black">&rarr;</span>
+              </LinkButton>
+            ) : whatsapp ? (
+              <LinkButton href={whatsapp} variant="primary" size="md" className="my-3">
+                Konsultasi <span className="font-black">&rarr;</span>
+              </LinkButton>
+            ) : null}
           </nav>
         </div>
       ) : null}

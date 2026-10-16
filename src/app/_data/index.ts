@@ -16,6 +16,8 @@ import type {
   WhatsappMarketing,
 } from '../../payload-types'
 
+import { buildSafe } from '../../utilities/buildSafe'
+
 export const fetchGlobals = async (): Promise<{
   footer: Footer
   mainMenu: MainMenu
@@ -23,35 +25,34 @@ export const fetchGlobals = async (): Promise<{
   siteSettings: SiteSetting
   whatsapp: WhatsappMarketing
 }> => {
-  const payload = await getPayload({ config })
-  const mainMenu = await payload.findGlobal({
-    slug: 'main-menu',
-    depth: 1,
-  })
-  const footer = await payload.findGlobal({
-    slug: 'footer',
-    depth: 1,
-  })
-  const topBar = await payload.findGlobal({
-    slug: 'topBar',
-    depth: 1,
-  })
-  const siteSettings = await payload.findGlobal({
-    slug: 'site-settings',
-    depth: 1,
-  })
-  const whatsapp = await payload.findGlobal({
-    slug: 'whatsapp-marketing',
-    depth: 0,
-  })
+  return buildSafe(
+    'fetchGlobals',
+    async () => {
+      const payload = await getPayload({ config })
+      const [mainMenu, footer, topBar, siteSettings, whatsapp] = await Promise.all([
+        payload.findGlobal({ slug: 'main-menu', depth: 2 }).catch(() => null),
+        payload.findGlobal({ slug: 'footer', depth: 2 }).catch(() => null),
+        payload.findGlobal({ slug: 'topBar', depth: 1 }).catch(() => null),
+        payload.findGlobal({ slug: 'site-settings', depth: 1 }).catch(() => null),
+        payload.findGlobal({ slug: 'whatsapp-marketing', depth: 0 }).catch(() => null),
+      ])
 
-  return {
-    footer,
-    mainMenu,
-    topBar,
-    siteSettings,
-    whatsapp,
-  }
+      return {
+        footer: footer as Footer,
+        mainMenu: mainMenu as MainMenu,
+        topBar: topBar as TopBar,
+        siteSettings: siteSettings as SiteSetting,
+        whatsapp: whatsapp as WhatsappMarketing,
+      }
+    },
+    {
+      footer: null as unknown as Footer,
+      mainMenu: null as unknown as MainMenu,
+      topBar: null as unknown as TopBar,
+      siteSettings: null as unknown as SiteSetting,
+      whatsapp: null as unknown as WhatsappMarketing,
+    },
+  )
 }
 
 export const fetchSiteSettings = async (): Promise<SiteSetting> => {

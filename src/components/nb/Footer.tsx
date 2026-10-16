@@ -57,16 +57,38 @@ const PHONE_DISPLAY = '+62 857-9952-0350'
 const PHONE_HREF = 'tel:+6285799520350'
 const EMAIL = 'halo@kotacom.id'
 
-export function Footer({
-  columns = DEFAULT_COLUMNS,
-  summary = 'Studio digital & percetakan di Surabaya. Website, software, infrastruktur IT, dan cetak.',
-}: {
+export interface FooterProps {
   columns?: FooterColumn[]
+  businessName?: string
   summary?: string
-}) {
+  whatsapp?: { href: string; display: string }
+  phone?: { href: string; display: string }
+  email?: string
+  offices?: Array<{ label: string; lines: string[] }>
+  foundedYear?: string
+}
+
+export function Footer({
+  columns = [],
+  businessName,
+  summary,
+  whatsapp,
+  phone,
+  email,
+  offices = [],
+  foundedYear,
+}: FooterProps) {
+  const hasContact = Boolean(whatsapp || phone || email)
+  const hasOffices = Array.isArray(offices) && offices.length > 0
+  const hasColumns = Array.isArray(columns) && columns.length > 0
+
   return (
     <footer className="border-t-4 border-ink bg-ink text-white">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div
+        className={`mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 ${
+          hasColumns ? 'lg:grid-cols-4' : 'lg:grid-cols-1'
+        } lg:px-8`}
+      >
         <div>
           <span className="inline-flex items-center gap-2 text-xl font-black uppercase tracking-tight">
             <span className="inline-flex items-center">
@@ -74,20 +96,35 @@ export function Footer({
               <span className="-ml-1 block h-6 w-6 rotate-45 border-2 border-white bg-nb-blue" />
               <span className="tri -ml-1 block h-5 w-5 border-2 border-white bg-nb-yellow" />
             </span>
-            Kotacom
+            {businessName || ''}
           </span>
-          <p className="mt-4 max-w-xs font-medium leading-relaxed text-white/80">{summary}</p>
-          <div className="mt-5 space-y-1.5 text-sm font-bold">
-            <a href={WHATSAPP_HREF} className="block hover:text-nb-yellow" rel="noopener noreferrer" target="_blank">
-              WhatsApp: {PHONE_DISPLAY}
-            </a>
-            <a href={PHONE_HREF} className="block hover:text-nb-yellow">
-              Telp: {PHONE_DISPLAY}
-            </a>
-            <a href={`mailto:${EMAIL}`} className="block lowercase hover:text-nb-yellow">
-              {EMAIL}
-            </a>
-          </div>
+          {summary ? (
+            <p className="mt-4 max-w-xs font-medium leading-relaxed text-white/80">{summary}</p>
+          ) : null}
+          {hasContact ? (
+            <div className="mt-5 space-y-1.5 text-sm font-bold">
+              {whatsapp ? (
+                <a
+                  href={whatsapp.href}
+                  className="block hover:text-nb-yellow"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  WhatsApp: {whatsapp.display}
+                </a>
+              ) : null}
+              {phone ? (
+                <a href={phone.href} className="block hover:text-nb-yellow">
+                  Telp: {phone.display}
+                </a>
+              ) : null}
+              {email ? (
+                <a href={`mailto:${email}`} className="block lowercase hover:text-nb-yellow">
+                  {email}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         {columns.map((col) => (
           <div key={col.title}>
@@ -110,32 +147,36 @@ export function Footer({
         ))}
       </div>
 
-      {/* Two physical offices */}
-      <div className="border-t-2 border-white/20">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:px-8">
-          {OFFICES.map((office) => (
-            <div key={office.label}>
-              <p className="font-mono text-xs font-bold uppercase tracking-widest text-nb-yellow">
-                {office.label}
-              </p>
-              <address className="mt-3 not-italic font-medium leading-relaxed text-white/80">
-                <span className="block font-bold text-white">Kotacom IT Service &amp; Percetakan</span>
-                {office.lines.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
-                ))}
-              </address>
-            </div>
-          ))}
+      {hasOffices ? (
+        <div className="border-t-2 border-white/20">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:px-8">
+            {offices.map((office) => (
+              <div key={office.label}>
+                <p className="font-mono text-xs font-bold uppercase tracking-widest text-nb-yellow">
+                  {office.label}
+                </p>
+                <address className="mt-3 not-italic font-medium leading-relaxed text-white/80">
+                  {businessName ? (
+                    <span className="block font-bold text-white">{businessName}</span>
+                  ) : null}
+                  {office.lines.map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </address>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
+
       <div className="border-t-2 border-white/20">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6 lg:px-8">
           <p className="font-mono text-xs uppercase tracking-widest text-white/70">
-            © {new Date().getFullYear()} Kotacom — Form follows function.
+            © {new Date().getFullYear()} {businessName || ''}
           </p>
-          <Pill tone="yellow">EST. 2008</Pill>
+          {foundedYear ? <Pill tone="yellow">EST. {foundedYear}</Pill> : null}
         </div>
       </div>
     </footer>

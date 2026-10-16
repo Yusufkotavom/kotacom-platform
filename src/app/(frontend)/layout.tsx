@@ -73,7 +73,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PrivacyProvider>
           <Providers>{children}</Providers>
         </PrivacyProvider>
-        <FloatingContact />
       </body>
     </html>
   )
