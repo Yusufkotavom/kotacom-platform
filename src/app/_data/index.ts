@@ -121,6 +121,53 @@ export const fetchPage = async (incomingSlugSegments: string[]): Promise<null | 
   return null
 }
 
+export const fetchHomePage = async (): Promise<null | Page> => {
+  try {
+    const { isEnabled: draft } = await draftMode()
+    const payload = await getPayload({ config })
+
+    const data = await payload.find({
+      collection: 'pages',
+      depth: 2,
+      draft,
+      limit: 10,
+      where: {
+        and: [
+          {
+            slug: {
+              in: ['index', 'home', ''],
+            },
+          },
+          ...(draft
+            ? []
+            : [
+                {
+                  _status: {
+                    equals: 'published',
+                  },
+                },
+              ]),
+        ],
+      },
+    })
+
+    if (!data.docs?.length) {
+      return null
+    }
+
+    const page =
+      data.docs.find((p) => p.slug === 'index') ||
+      data.docs.find((p) => p.slug === 'home') ||
+      data.docs.find((p) => !p.slug) ||
+      data.docs[0]
+
+    return (page as Page) || null
+  } catch (err) {
+    console.error('Error fetching home page from CMS:', err)
+    return null
+  }
+}
+
 export const fetchPages = async (): Promise<Partial<Page>[]> => {
   const payload = await getPayload({ config })
   const data = await payload.find({

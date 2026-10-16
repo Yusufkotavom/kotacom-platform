@@ -32,7 +32,7 @@ export const DefaultHero: React.FC<
       />
 
       <div className="relative z-10 max-w-4xl">
-        <HeroEyebrow dotColor="bg-nb-red">Kotacom</HeroEyebrow>
+        {pageTitle && <HeroEyebrow dotColor="bg-nb-red">{pageTitle}</HeroEyebrow>}
 
         {pageTitle && (
           <h1 className="mt-6 text-4xl uppercase leading-[0.9] tracking-tighter sm:text-6xl lg:text-7xl font-black">

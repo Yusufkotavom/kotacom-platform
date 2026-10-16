@@ -479,7 +479,7 @@ const WA_NUMBER = '6285799520350'
 
 function WhatsAppCtaBlock({ fields }: { fields: any; id?: string }) {
   const { heading, body, variant = 'button', label } = fields || {}
-  const text = encodeURIComponent(heading || body || 'Halo Kotacom, saya ingin bertanya.')
+  const text = encodeURIComponent(heading || body || 'Halo, saya ingin bertanya.')
   const href = `https://wa.me/${WA_NUMBER}?text=${text}`
   if (variant === 'link') {
     return (
@@ -626,7 +626,7 @@ function ComparisonTableBlock({ fields }: { fields: any; id?: string }) {
                 {header.tableTitle || 'Fitur'}
               </th>
               <th className="border-l-4 border-white/30 p-5 font-black uppercase tracking-wider">
-                {header.columnOneHeader || 'Kotacom'}
+                {header.columnOneHeader || 'Pilihan Utama'}
               </th>
               <th className="border-l-4 border-white/30 p-5 font-black uppercase tracking-wider">
                 {header.columnTwoHeader || 'Lainnya'}
@@ -805,7 +805,7 @@ function CaseStudiesHighlightBlock({ fields, id }: { fields: any; id?: string })
 
 function FormDisplayBlock({ fields, id }: { fields: any; id?: string }) {
   const { richText, form } = fields || {}
-  const formTitle = typeof form === 'object' ? form?.title : 'Formulir Kontak Kotacom'
+  const formTitle = typeof form === 'object' ? form?.title : 'Formulir Kontak'
   return (
     <Section bg="canvas" id={id}>
       <div className="mx-auto max-w-2xl border-4 border-ink bg-paper p-8 shadow-nb-lg">

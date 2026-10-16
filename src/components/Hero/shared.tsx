@@ -58,7 +58,7 @@ export function HeroLinkButton({
 }
 
 export function HeroEyebrow({
-  children = 'Kotacom Platform',
+  children,
   dotColor = 'bg-nb-red',
   className,
 }: {
@@ -66,6 +66,7 @@ export function HeroEyebrow({
   dotColor?: string
   className?: string
 }) {
+  if (!children) return null
   return (
     <span
       className={cn(
