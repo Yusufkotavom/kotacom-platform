@@ -2540,11 +2540,6 @@
     "permanent": true
   },
   {
-    "source": "/jasa-pembuatan-website",
-    "destination": "/produk",
-    "permanent": true
-  },
-  {
     "source": "/blog/category/startup",
     "destination": "/posts",
     "permanent": true
