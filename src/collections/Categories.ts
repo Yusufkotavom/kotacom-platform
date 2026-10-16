@@ -67,18 +67,26 @@ export const Categories: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, previousDoc }) => {
-        revalidatePath(`/posts/${doc.slug}`)
-        revalidateTag('archives', { expire: 0 })
+        try {
+          revalidatePath(`/posts/${doc.slug}`)
+          revalidateTag('archives', { expire: 0 })
 
-        if (doc.slug !== previousDoc?.slug) {
-          revalidatePath(`/posts/${previousDoc?.slug}`)
+          if (doc.slug !== previousDoc?.slug) {
+            revalidatePath(`/posts/${previousDoc?.slug}`)
+          }
+        } catch {
+          // Guard: revalidatePath throws outside Next.js request context
         }
       },
     ],
     afterDelete: [
       async ({ doc }) => {
-        revalidatePath(`/posts/${doc.slug}`)
-        revalidateTag('archives', { expire: 0 })
+        try {
+          revalidatePath(`/posts/${doc.slug}`)
+          revalidateTag('archives', { expire: 0 })
+        } catch {
+          // Guard: revalidatePath throws outside Next.js request context
+        }
       },
     ],
   },
