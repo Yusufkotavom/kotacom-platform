@@ -18,19 +18,25 @@ import './globals.css'
 // (pages)/layout.tsx, which caches at the data layer so the build needs no database).
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kotacom.id'
+// Branding is per-deployment: multi-site installs share this repo, so read the
+// name/tagline/description from build-time env (NEXT_PUBLIC_* are inlined).
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'Kotacom'
+const siteTagline = process.env.NEXT_PUBLIC_SITE_TAGLINE || 'Solusi IT, Website, Software & Percetakan Surabaya'
+const siteDescription =
+  process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
+  'Kotacom adalah mitra IT & percetakan terpercaya sejak 2008: pembuatan website, software development, IT support, hingga cetak buku, brosur, dan kemasan untuk bisnis Anda.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Kotacom — Solusi IT, Website, Software & Percetakan Surabaya',
-    template: '%s | Kotacom',
+    default: `${siteName} — ${siteTagline}`,
+    template: `%s | ${siteName}`,
   },
-  description:
-    'Kotacom adalah mitra IT & percetakan terpercaya sejak 2008: pembuatan website, software development, IT support, hingga cetak buku, brosur, dan kemasan untuk bisnis Anda.',
-  applicationName: 'Kotacom',
-  authors: [{ name: 'Kotacom', url: siteUrl }],
-  creator: 'Kotacom',
-  publisher: 'Kotacom',
+  description: siteDescription,
+  applicationName: siteName,
+  authors: [{ name: siteName, url: siteUrl }],
+  creator: siteName,
+  publisher: siteName,
   category: 'technology',
   alternates: { canonical: '/' },
   openGraph: mergeOpenGraph(),
