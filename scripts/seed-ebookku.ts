@@ -180,6 +180,14 @@ Pilih satu istilah untuk satu hal, lalu pakai konsisten sampai akhir. Pembaca me
 
 const pagesData = [
 	{
+		title: 'Ebookku — Panduan Menulis & Menerbitkan Ebook',
+		slug: 'home',
+		description:
+			'Ebookku membantu penulis pemula mengubah ide menjadi ebook dan buku cetak yang siap dijual: panduan menulis, penyuntingan, desain cover, ISBN, dan cetak.',
+		richText:
+			'## Dari Ide sampai Ebook Siap Jual\nPanduan praktis menulis, menyunting, mencetak, dan menjual ebook serta buku — tanpa jargon, langsung bisa diikuti.',
+	},
+	{
 		title: 'Tentang Ebookku',
 		slug: 'tentang',
 		description:
